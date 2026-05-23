@@ -9,7 +9,9 @@
 <body>
   <nav th:fragment="nav">
     <span sec:authentication="name">User</span>
-    <a th:href="@{/cms/auth/logout}">登出</a>
+    <form th:action="@{/cms/auth/logout}" method="post" style="display:inline">
+      <button type="submit">登出</button>
+    </form>
   </nav>
   <div th:fragment="content">
     <!-- 頁面內容放置處 -->

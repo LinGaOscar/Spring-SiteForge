@@ -8,6 +8,8 @@
 <body>
   <h1>SiteForge CMS Dashboard</h1>
   <p>歡迎，<span sec:authentication="name"></span></p>
-  <a th:href="@{/cms/auth/logout}">登出</a>
+  <form th:action="@{/cms/auth/logout}" method="post">
+    <button type="submit">登出</button>
+  </form>
 </body>
 </html>
