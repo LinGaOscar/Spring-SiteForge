@@ -43,7 +43,6 @@ public class PageController {
         return ApiResponse.ok(pageService.update(id, request, authentication.getName()));
     }
 
-    // @EnableMethodSecurity 將於 Task 9 啟用，此處先宣告 role 保護
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
