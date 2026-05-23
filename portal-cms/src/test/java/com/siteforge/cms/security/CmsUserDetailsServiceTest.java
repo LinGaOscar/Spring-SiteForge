@@ -45,7 +45,7 @@ class CmsUserDetailsServiceTest {
         assertThat(details.getUsername()).isEqualTo("manager");
         assertThat(details.getAuthorities())
             .extracting("authority")
-            .containsExactly("ROLE_MANAGER");
+            .containsExactlyInAnyOrder("ROLE_MANAGER");
     }
 
     @Test

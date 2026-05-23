@@ -23,7 +23,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 // 登入頁、靜態資源、錯誤頁對外開放
-                .requestMatchers("/cms/auth/login", "/css/**", "/js/**", "/error").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/error").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
