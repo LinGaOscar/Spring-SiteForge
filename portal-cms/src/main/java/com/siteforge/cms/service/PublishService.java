@@ -51,26 +51,26 @@ public class PublishService {
     }
 
     public PageVersionResponse rollback(Long pageId, Long versionId, String username) {
-        Page page = pageRepository.findById(pageId)
-            .orElseThrow(() -> new IllegalArgumentException("Page not found: " + pageId));
+        if (!pageRepository.existsById(pageId))
+            throw new IllegalArgumentException("Page not found: " + pageId);
         PageVersion targetVersion = pageVersionRepository.findById(versionId)
             .orElseThrow(() -> new IllegalArgumentException("Version not found: " + versionId));
 
         if (!targetVersion.getPage().getId().equals(pageId))
             throw new IllegalArgumentException("Version does not belong to page: " + pageId);
 
-        restoreSnapshot(page, targetVersion.getSnapshotJson());
-        page.setStatus(PageStatus.PUBLISHED);
-        page.setUpdatedBy(username);
-        pageRepository.save(page);
+        Page managedPage = restoreSnapshot(pageId, targetVersion.getSnapshotJson());
+        managedPage.setStatus(PageStatus.PUBLISHED);
+        managedPage.setUpdatedBy(username);
+        pageRepository.save(managedPage);
 
         List<PageContent> restoredContents = pageContentRepository.findByPageIdOrderBySortOrder(pageId);
         int nextVersionNo = pageVersionRepository.findMaxVersionNoByPageId(pageId).orElse(0) + 1;
 
         PageVersion rollbackVersion = new PageVersion();
-        rollbackVersion.setPage(page);
+        rollbackVersion.setPage(managedPage);
         rollbackVersion.setVersionNo(nextVersionNo);
-        rollbackVersion.setSnapshotJson(buildSnapshot(page, restoredContents));
+        rollbackVersion.setSnapshotJson(buildSnapshot(managedPage, restoredContents));
         rollbackVersion.setStatus(PageStatus.PUBLISHED);
         rollbackVersion.setPublishedAt(LocalDateTime.now());
         rollbackVersion.setPublishedBy(username);
@@ -103,27 +103,34 @@ public class PublishService {
         }
     }
 
-    private void restoreSnapshot(Page page, String snapshotJson) {
+    private Page restoreSnapshot(Long pageId, String snapshotJson) {
         PageSnapshot snapshot;
         try {
             snapshot = objectMapper.readValue(snapshotJson, PageSnapshot.class);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Failed to deserialize page snapshot", e);
         }
-        page.setPath(snapshot.path());
-        page.setTitle(snapshot.title());
-        page.setSeoTitle(snapshot.seoTitle());
-        page.setSeoDescription(snapshot.seoDescription());
+
+        // 先刪除，避免 clearAutomatically=true 導致後續 page entity 變成 detached
+        pageContentRepository.deleteAllByPageId(pageId);
+
+        // EM.clear() 之後必須重新從 DB 取得受管理的 page entity
+        Page managedPage = pageRepository.findById(pageId)
+            .orElseThrow(() -> new IllegalStateException("Page not found after content delete: " + pageId));
+
+        managedPage.setPath(snapshot.path());
+        managedPage.setTitle(snapshot.title());
+        managedPage.setSeoTitle(snapshot.seoTitle());
+        managedPage.setSeoDescription(snapshot.seoDescription());
         if (snapshot.layoutSetId() != null) {
-            page.setLayoutSet(layoutSetRepository.getReferenceById(snapshot.layoutSetId()));
+            managedPage.setLayoutSet(layoutSetRepository.getReferenceById(snapshot.layoutSetId()));
         } else {
-            page.setLayoutSet(null);
+            managedPage.setLayoutSet(null);
         }
 
-        pageContentRepository.deleteAllByPageId(page.getId());
         List<PageContent> restored = snapshot.contents().stream().map(block -> {
             PageContent c = new PageContent();
-            c.setPage(page);
+            c.setPage(managedPage);
             c.setBlockKey(block.blockKey());
             c.setSortOrder(block.sortOrder());
             c.setContentJson(block.contentJson());
@@ -131,6 +138,7 @@ public class PublishService {
             return c;
         }).toList();
         pageContentRepository.saveAll(restored);
+        return managedPage;
     }
 
     private PageVersionResponse toVersionResponse(PageVersion v) {

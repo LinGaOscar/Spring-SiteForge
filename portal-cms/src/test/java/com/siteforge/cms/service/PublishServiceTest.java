@@ -8,6 +8,7 @@ import com.siteforge.domain.entity.PageVersion;
 import com.siteforge.domain.entity.Site;
 import com.siteforge.domain.enums.PageStatus;
 import com.siteforge.domain.enums.TemplateKey;
+import com.siteforge.domain.repository.LayoutSetRepository;
 import com.siteforge.domain.repository.PageContentRepository;
 import com.siteforge.domain.repository.PageRepository;
 import com.siteforge.domain.repository.PageVersionRepository;
@@ -36,6 +37,7 @@ class PublishServiceTest {
     @Mock PageContentRepository pageContentRepository;
     @Mock PageVersionRepository pageVersionRepository;
     @Spy ObjectMapper objectMapper;
+    @Mock LayoutSetRepository layoutSetRepository;
     @InjectMocks PublishService publishService;
 
     private Page page;
@@ -86,5 +88,34 @@ class PublishServiceTest {
         when(pageVersionRepository.findByPageIdOrderByVersionNoDesc(1L)).thenReturn(List.of(v));
 
         assertThat(publishService.listVersions(1L)).hasSize(1);
+    }
+
+    @Test
+    void rollback_validVersion_createsNewVersionAndRestoresPage() {
+        when(pageRepository.existsById(1L)).thenReturn(true);
+
+        PageVersion targetVersion = new PageVersion();
+        targetVersion.setId(5L); targetVersion.setPage(page); targetVersion.setVersionNo(1);
+        targetVersion.setSnapshotJson("{\"pageId\":1,\"path\":\"/about\",\"title\":\"About\",\"seoTitle\":null,\"seoDescription\":null,\"layoutSetId\":null,\"contents\":[]}");
+        targetVersion.setStatus(PageStatus.PUBLISHED);
+        targetVersion.setPublishedAt(LocalDateTime.now()); targetVersion.setPublishedBy("manager");
+        targetVersion.setCreatedAt(LocalDateTime.now());
+        when(pageVersionRepository.findById(5L)).thenReturn(Optional.of(targetVersion));
+
+        when(pageRepository.findById(1L)).thenReturn(Optional.of(page));
+        when(pageContentRepository.findByPageIdOrderBySortOrder(1L)).thenReturn(List.of());
+        when(pageVersionRepository.findMaxVersionNoByPageId(1L)).thenReturn(Optional.of(1));
+        when(pageRepository.save(any())).thenReturn(page);
+
+        PageVersion newVersion = new PageVersion();
+        newVersion.setId(2L); newVersion.setPage(page); newVersion.setVersionNo(2);
+        newVersion.setSnapshotJson("{}"); newVersion.setStatus(PageStatus.PUBLISHED);
+        newVersion.setPublishedAt(LocalDateTime.now()); newVersion.setPublishedBy("manager");
+        newVersion.setCreatedAt(LocalDateTime.now());
+        when(pageVersionRepository.save(any())).thenReturn(newVersion);
+
+        PageVersionResponse response = publishService.rollback(1L, 5L, "manager");
+        assertThat(response.versionNo()).isEqualTo(2);
+        assertThat(response.status()).isEqualTo(PageStatus.PUBLISHED);
     }
 }
