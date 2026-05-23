@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>登入 — SiteForge CMS</title>
+</head>
+<body>
+  <h1>SiteForge CMS</h1>
+
+  <div th:if="${param.error}">
+    <p style="color:red">帳號或密碼錯誤</p>
+  </div>
+  <div th:if="${param.logout}">
+    <p>已成功登出</p>
+  </div>
+
+  <form th:action="@{/cms/auth/login}" method="post">
+    <label>帳號
+      <input type="text" name="username" autocomplete="username" required>
+    </label>
+    <label>密碼
+      <input type="password" name="password" autocomplete="current-password" required>
+    </label>
+    <button type="submit">登入</button>
+  </form>
+</body>
+</html>

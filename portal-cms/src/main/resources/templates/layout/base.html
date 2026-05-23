@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${pageTitle} ?: 'SiteForge CMS'">SiteForge CMS</title>
+</head>
+<body>
+  <nav th:fragment="nav">
+    <span sec:authentication="name">User</span>
+    <a th:href="@{/cms/auth/logout}">登出</a>
+  </nav>
+  <div th:fragment="content">
+    <!-- 頁面內容放置處 -->
+  </div>
+</body>
+</html>
