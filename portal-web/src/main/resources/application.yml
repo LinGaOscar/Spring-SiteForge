@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: portal-web
+  jpa:
+    open-in-view: false
+  flyway:
+    enabled: false
+
+server:
+  port: 8100
