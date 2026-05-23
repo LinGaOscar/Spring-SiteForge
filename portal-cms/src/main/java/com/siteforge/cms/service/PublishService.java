@@ -9,6 +9,7 @@ import com.siteforge.domain.entity.PageVersion;
 import com.siteforge.domain.enums.PageStatus;
 import com.siteforge.domain.repository.PageContentRepository;
 import com.siteforge.domain.repository.PageRepository;
+import com.siteforge.domain.repository.LayoutSetRepository;
 import com.siteforge.domain.repository.PageVersionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class PublishService {
     private final PageContentRepository pageContentRepository;
     private final PageVersionRepository pageVersionRepository;
     private final ObjectMapper objectMapper;
+    private final LayoutSetRepository layoutSetRepository;
 
     public PageVersionResponse publish(Long pageId, String username) {
         Page page = pageRepository.findById(pageId)
@@ -51,18 +53,29 @@ public class PublishService {
     public PageVersionResponse rollback(Long pageId, Long versionId, String username) {
         Page page = pageRepository.findById(pageId)
             .orElseThrow(() -> new IllegalArgumentException("Page not found: " + pageId));
-        PageVersion version = pageVersionRepository.findById(versionId)
+        PageVersion targetVersion = pageVersionRepository.findById(versionId)
             .orElseThrow(() -> new IllegalArgumentException("Version not found: " + versionId));
 
-        if (!version.getPage().getId().equals(pageId))
+        if (!targetVersion.getPage().getId().equals(pageId))
             throw new IllegalArgumentException("Version does not belong to page: " + pageId);
 
-        restoreSnapshot(page, version.getSnapshotJson());
+        restoreSnapshot(page, targetVersion.getSnapshotJson());
         page.setStatus(PageStatus.PUBLISHED);
         page.setUpdatedBy(username);
         pageRepository.save(page);
 
-        return toVersionResponse(version);
+        List<PageContent> restoredContents = pageContentRepository.findByPageIdOrderBySortOrder(pageId);
+        int nextVersionNo = pageVersionRepository.findMaxVersionNoByPageId(pageId).orElse(0) + 1;
+
+        PageVersion rollbackVersion = new PageVersion();
+        rollbackVersion.setPage(page);
+        rollbackVersion.setVersionNo(nextVersionNo);
+        rollbackVersion.setSnapshotJson(buildSnapshot(page, restoredContents));
+        rollbackVersion.setStatus(PageStatus.PUBLISHED);
+        rollbackVersion.setPublishedAt(LocalDateTime.now());
+        rollbackVersion.setPublishedBy(username);
+
+        return toVersionResponse(pageVersionRepository.save(rollbackVersion));
     }
 
     @Transactional(readOnly = true)
@@ -101,6 +114,11 @@ public class PublishService {
         page.setTitle(snapshot.title());
         page.setSeoTitle(snapshot.seoTitle());
         page.setSeoDescription(snapshot.seoDescription());
+        if (snapshot.layoutSetId() != null) {
+            page.setLayoutSet(layoutSetRepository.getReferenceById(snapshot.layoutSetId()));
+        } else {
+            page.setLayoutSet(null);
+        }
 
         pageContentRepository.deleteAllByPageId(page.getId());
         List<PageContent> restored = snapshot.contents().stream().map(block -> {
