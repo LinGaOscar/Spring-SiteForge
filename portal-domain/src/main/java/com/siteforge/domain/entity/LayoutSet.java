@@ -51,7 +51,10 @@ public class LayoutSet {
     private String updatedBy;
 
     @PrePersist
-    void prePersist() { createdAt = updatedAt = LocalDateTime.now(); }
+    void prePersist() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
     @PreUpdate
     void preUpdate() { updatedAt = LocalDateTime.now(); }

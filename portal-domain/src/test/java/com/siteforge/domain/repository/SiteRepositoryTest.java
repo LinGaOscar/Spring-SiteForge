@@ -21,7 +21,10 @@ class SiteRepositoryTest {
         siteRepository.save(site);
 
         assertThat(siteRepository.findByCode("default")).isPresent()
-            .hasValueSatisfying(s -> assertThat(s.getCode()).isEqualTo("default"));
+            .hasValueSatisfying(s -> {
+                assertThat(s.getCode()).isEqualTo("default");
+                assertThat(s.getCreatedAt()).isNotNull();
+            });
     }
 
     @Test

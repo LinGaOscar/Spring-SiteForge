@@ -6,7 +6,9 @@ CREATE TABLE site (
     default_locale VARCHAR(10)  NOT NULL DEFAULT 'zh-TW',
     enabled        BOOLEAN      NOT NULL DEFAULT TRUE,
     created_at     TIMESTAMP    NOT NULL DEFAULT NOW(),
-    updated_at     TIMESTAMP    NOT NULL DEFAULT NOW()
+    updated_at     TIMESTAMP    NOT NULL DEFAULT NOW(),
+    created_by     VARCHAR(100),
+    updated_by     VARCHAR(100)
 );
 
 CREATE TABLE layout_set (

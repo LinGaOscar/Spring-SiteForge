@@ -37,8 +37,17 @@ public class Site {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "created_by", length = 100)
+    private String createdBy;
+
+    @Column(name = "updated_by", length = 100)
+    private String updatedBy;
+
     @PrePersist
-    void prePersist() { createdAt = updatedAt = LocalDateTime.now(); }
+    void prePersist() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
     @PreUpdate
     void preUpdate() { updatedAt = LocalDateTime.now(); }
