@@ -2,9 +2,9 @@
 
 ## 專案定位
 
-SpringSiteForge 是一套以 Spring Boot 為核心的官網內容管理平台，採前後台分離但不拆微服務的方式建置，分為前台網站 `portal-web`、後台控制頁面 `cms-web`、以及後台 API `cms-api` 三個應用。
+SpringSiteForge 是一套以 Spring Boot 為核心的官網內容管理平台，採前後台分離但不拆微服務的方式建置，分為前台網站 `portal-web`、後台 CMS `portal-cms`，以及共用的 JPA 模組 `portal-domain` 三個 Maven 模組。
 
-此架構的目標是讓前台保有 SEO 與 SSR 能力，並由後台決定每個頁面要套用哪一組 header、body、footer 模板，同時把內容維護、發布與版本管理集中在 CMS 流程中。
+兩個 Spring Boot 應用共用同一個 PostgreSQL 資料庫，`portal-web` 唯讀、`portal-cms` 完整讀寫，以資料庫存取層級的職責分離取代服務間 HTTP 呼叫，同時保有 SEO 與 SSR 能力，並把內容維護、發布與版本管理集中在 `portal-cms` 中。
 
 ## 建置目標
 
@@ -28,59 +28,52 @@ SpringSiteForge 的 MVP 至少要達成：
 
 ## 系統架構
 
+### portal-domain
+
+`portal-domain` 是 Maven 共用模組，不部署為獨立應用，僅作為 `portal-web` 與 `portal-cms` 的依賴項。
+
+主要內容如下：
+
+- JPA Entity（`Page`、`LayoutSet`、`PageContent`、`PageVersion`、`Asset`、`CmsUser` 等）。
+- Spring Data JPA Repository 介面。
+- 共用 DTO 與常數（如 `PageStatus`、`TemplateKey` 白名單 enum）。
+
 ### portal-web
 
-`portal-web` 負責訪客看到的正式網站，使用 Spring Boot MVC 搭配 Thymeleaf 做伺服器端渲染，並依頁面設定動態組裝 fragments 與 layouts。
+`portal-web` 負責訪客看到的正式網站，使用 Spring Boot MVC 搭配 Thymeleaf 做伺服器端渲染，並透過 Vue.js 增強前端互動體驗。所有資料透過 `portal-domain` 直接查詢共用資料庫（唯讀）。
 
 主要職責如下：
 
-- 接收前台網址請求。
-- 呼叫 `cms-api` 取得已發布頁面。
-- 依設定選擇 header、body、footer。
-- 輸出 SEO 友善 HTML。
+- 接收前台網址請求，透過 `portal-domain` Repository 查詢已發布頁面（status = PUBLISHED）。
+- 依設定選擇 header、body、footer 並組裝 Thymeleaf Model，輸出 SEO 友善 HTML。
+- 提供唯讀 REST API，供 Vue.js 元件動態載入資料（如搜尋、篩選）。
 - 處理 404、500 與快取邏輯。
 
-### cms-web
+### portal-cms
 
-`cms-web` 是後台控制頁面，提供管理者登入後操作頁面、版型、內容、發布、媒資與版本等功能；此層屬於管理介面，不直接承擔核心商業邏輯。
-
-主要職責如下：
-
-- 登入與權限控制頁面。
-- 頁面 CRUD 與查詢。
-- 版型綁定與內容編輯。
-- 預覽、發布與回滾操作。
-- 媒資管理與操作紀錄查詢。
-
-### cms-api
-
-`cms-api` 是系統的資料與流程中心，負責提供 public/admin API、執行驗證、存取資料庫、維護發布流程與版本管理。
+`portal-cms` 整合後台管理介面與資料存取邏輯，透過 `portal-domain` 直接讀寫共用資料庫，提供 Thymeleaf 頁面搭配 AJAX REST API 的管理體驗。
 
 主要職責如下：
 
-- 提供前台與後台使用的 REST API。
-- 管理頁面、版型、內容區塊與資產。
+- 登入與權限控制（Spring Security）。
+- 頁面、版型、內容區塊、媒資的 CRUD REST API。
 - 驗證 template key 與資料完整性。
 - 實作草稿、發布、回滾流程。
-- 控制權限與審計紀錄。
+- 操作紀錄與版本查詢。
 
 ## 核心設計原則
 
 ### 1. 前後台分離
 
-前台網站、後台頁面、後台 API 各自獨立部署，避免把控制頁面、商業邏輯與正式網站渲染綁在同一個應用中。
+`portal-web` 與 `portal-cms` 各自獨立部署，共用同一個 PostgreSQL 資料庫，以職責分離（唯讀 vs 讀寫）取代服務間 HTTP 呼叫，降低網路延遲與運維複雜度。
 
-### 2. API 為唯一資料入口
+### 2. 前台只讀已發布版本
 
-`portal-web` 與 `cms-web` 都只能透過 `cms-api` 交換資料，不直接讀寫資料庫，以維持單一資料治理邊界。
+`portal-web` 只能查詢 `status = PUBLISHED` 的頁面，此限制由 `portal-domain` 的 Repository 查詢條件強制執行，Service 層禁止傳入草稿資料至 Thymeleaf Model。
 
-### 3. 前台只讀已發布版本
+### 3. 模板白名單化
 
-前台正式站不得讀取草稿資料，所有正式內容都來自已發布版本，避免編輯中內容外漏。
-
-### 4. 模板白名單化
-
-後台只能從系統預先定義的模板清單中選擇 header、body、footer，不允許任意輸入模板路徑，避免安全與維運風險。
+後台只能從 `portal-domain` 預先定義的 `TemplateKey` enum 中選擇 header、body、footer，不允許任意輸入模板路徑，避免安全與維運風險。
 
 ## 頁面組裝模式
 
@@ -91,10 +84,9 @@ Thymeleaf 支援 fragments 與 layouts，可透過 include 方式將共用區塊
 前台渲染流程如下：
 
 1. 使用者進入前台網址，例如 `/about`。
-2. `portal-web` 呼叫 `cms-api` 查詢對應 path 的已發布頁面。
-3. API 回傳 SEO、layout、section 與 content block。
-4. `portal-web` 將模板 key 放入 model。
-5. Thymeleaf 依設定以 `th:replace` 或 fragment expression 組頁輸出。
+2. `portal-web` PageController 呼叫 Service，透過 `portal-domain` Repository 查詢 path 對應的已發布頁面。
+3. Service 組裝 SEO、layout key、section 與 content block 並放入 Model。
+4. Thymeleaf 依 layout key 以 `th:replace` 動態插入 header、body、footer fragment 組頁輸出。
 
 ## 功能範圍
 
@@ -174,7 +166,7 @@ Thymeleaf 支援 fragments 與 layouts，可透過 include 方式將共用區塊
 - size。
 - 建立時間。
 
-### admin_user / admin_role
+### cms_user / cms_role
 
 - 管理者帳號。
 - 角色。
@@ -184,47 +176,45 @@ Thymeleaf 支援 fragments 與 layouts，可透過 include 方式將共用區塊
 
 ## API 規劃
 
-### Public API
+### Public REST API（portal-web 提供，唯讀，供 Vue.js 元件使用）
 
-前台使用的 API 建議如下：
+- `GET /api/pages/search`
+- `GET /api/pages/{path}`（Vue.js 動態換頁用，非初次 SSR）
+- `GET /api/assets/{id}`
 
-- `GET /api/public/pages/{path}`
-- `GET /api/public/sites/{siteCode}`
-- `GET /api/public/assets/{id}`
+### CMS REST API（portal-cms 提供，供後台 Vue.js / AJAX 使用）
 
-`GET /api/public/pages/{path}` 建議回傳：
-
-- `pagePath`
-- `seo`
-- `layout`
-- `sections`
-- `contentBlocks`
-- `publishVersion`
-
-### Admin API
-
-後台使用的 API 建議如下：
-
-- `POST /api/admin/auth/login`
-- `GET /api/admin/pages`
-- `POST /api/admin/pages`
-- `PUT /api/admin/pages/{id}`
-- `GET /api/admin/layouts`
-- `POST /api/admin/layouts`
-- `POST /api/admin/assets`
-- `POST /api/admin/pages/{id}/publish`
-- `POST /api/admin/pages/{id}/rollback`
+- `POST /api/cms/auth/login`
+- `GET /api/cms/pages`
+- `POST /api/cms/pages`
+- `PUT /api/cms/pages/{id}`
+- `DELETE /api/cms/pages/{id}`
+- `GET /api/cms/layouts`
+- `POST /api/cms/layouts`
+- `PUT /api/cms/layouts/{id}`
+- `POST /api/cms/assets`
+- `POST /api/cms/pages/{id}/publish`
+- `POST /api/cms/pages/{id}/rollback`
+- `GET /api/cms/pages/{id}/versions`
 
 ## 專案結構
+
+### portal-domain（共用模組，不部署）
+
+```text
+portal-domain
+ ├─ entity       (JPA Entity)
+ ├─ repository   (Spring Data JPA Repository)
+ ├─ enums        (PageStatus, TemplateKey 白名單 enum)
+ └─ dto          (跨模組共用 DTO)
+```
 
 ### portal-web
 
 ```text
 portal-web
- ├─ controller
+ ├─ controller   (Thymeleaf MVC + 唯讀 REST API)
  ├─ service
- ├─ client
- ├─ model
  ├─ config
  └─ resources
     ├─ templates
@@ -235,16 +225,16 @@ portal-web
     │  │  └─ components
     │  └─ pages
     └─ static
+       └─ js     (Vue.js 元件)
 ```
 
-### cms-web
+### portal-cms
 
 ```text
-cms-web
- ├─ controller
+portal-cms
+ ├─ controller   (Thymeleaf MVC + CMS REST API)
  ├─ service
- ├─ client
- ├─ model
+ ├─ security
  ├─ config
  └─ resources
     ├─ templates
@@ -255,70 +245,60 @@ cms-web
     │  ├─ content
     │  └─ fragments
     └─ static
-```
-
-### cms-api
-
-```text
-cms-api
- ├─ controller
- ├─ service
- ├─ repository
- ├─ domain
- ├─ dto
- ├─ security
- └─ config
+       └─ js     (Vue.js 元件)
 ```
 
 ## 技術選型
 
 第一版建議技術如下：
 
-- Java 21  
-- Spring Boot 3.x  
-- Spring Web MVC  
-- Thymeleaf  
-- Spring Security  
-- Spring Data JPA  
-- PostgreSQL  
-- Redis（可於第二階段補上）  
-- OpenAPI / Swagger  
-- MapStruct  
+- Java 21
+- Spring Boot 3.x
+- Spring Web MVC
+- Thymeleaf（SSR 頁面殼層）
+- Vue.js 3（前端互動元件，CDN 引入或 Vite 打包）
+- Spring Security
+- Spring Data JPA
+- PostgreSQL
+- Flyway（schema 版本管理）
+- Redis（可於第二階段補上）
+- OpenAPI / Swagger（CMS API 文件）
+- MapStruct
 - Lombok（視團隊接受度而定）
 
 ## 分階段建置時程
 
-### Phase 1：基礎骨架（1 週）
+### Phase 1：基礎骨架（1.5 週）
 
-- 建立 `portal-web`、`cms-web`、`cms-api` 三個專案。
-- 建立共用設定與 profile。
-- 建立 PostgreSQL schema 初版。
-- 完成基本登入與錯誤處理。
-- 建立 API response format。
+- 建立 Maven parent pom，初始化 `portal-domain`、`portal-web`、`portal-cms` 三個模組。
+- 建立共用設定與 profile（dev/prod）。
+- 引入 Flyway，建立 PostgreSQL schema 初版。
+- 完成 `portal-cms` 基本登入（Spring Security）與錯誤處理。
+- 定義統一 API response format（`{ success, data, error }`）。
 
-### Phase 2：cms-api 核心（2 週）
+### Phase 2：portal-cms 核心（2 週）
 
-- 完成 page/layout/content/asset CRUD。
+- 完成 `portal-domain` entity 與 repository。
+- 完成 page/layout/content/asset CRUD REST API。
 - 完成角色權限控制。
 - 完成 draft/published 資料模型。
 - 完成發布與回滾 service。
-- 建立 public/admin API。
 
-### Phase 3：cms-web 後台頁面（2 週）
+### Phase 3：portal-cms 後台頁面（1.5 週）
 
 - Dashboard。
-- 頁面列表與查詢。
+- 頁面列表與查詢（Thymeleaf + AJAX）。
 - 頁面建立與編輯。
 - 版型設定頁。
-- 內容編輯頁。
-- 發布紀錄頁。
+- 內容區塊編輯頁。
+- 發布紀錄與版本查詢頁。
 - 媒資管理頁。
 
 ### Phase 4：portal-web 前台渲染（2 週）
 
-- 依 path 查詢已發布頁面。
-- 動態載入 header、body、footer。
-- 載入 SEO meta。
+- 依 path 透過 `portal-domain` Repository 查詢已發布頁面。
+- 動態載入 header、body、footer fragment。
+- 載入 SEO meta 與 Open Graph。
 - 建立 404、500、maintenance 頁。
 - 加入 fallback layout。
 
@@ -338,8 +318,7 @@ cms-api
 ### 預設 Port 與 URL
 
 - `portal-web`：`http://localhost:8100`
-- `cms-web`：`http://localhost:8200`
-- `cms-api`：`http://localhost:8300`
+- `portal-cms`：`http://localhost:8200`
 
 各應用在 `application.yml` 中設定 `server.port`，例如：
 
@@ -348,24 +327,18 @@ cms-api
 server:
   port: 8100
 
-# cms-web
+# portal-cms
 server:
   port: 8200
-
-# cms-api
-server:
-  port: 8300
 ```
-
-Spring Boot 內建的嵌入式伺服器預設為 8080，只要在設定檔覆寫 `server.port` 即可改為其他 port。
 
 ### 啟動順序建議
 
-1. 啟動 `cms-api`（8300）：確保 API 與資料庫連線正常。
-2. 啟動 `cms-web`（8200）：透過瀏覽器登入後台確認可以呼叫 `cms-api` 正常運作。
-3. 啟動 `portal-web`（8100）：確認前台可透過 `cms-api` 取得已發布頁面並渲染。
+1. 確認 PostgreSQL 已啟動並套用 Flyway migration。
+2. 啟動 `portal-cms`（8200）：透過瀏覽器登入後台確認 DB 連線正常。
+3. 啟動 `portal-web`（8100）：確認前台能查詢已發布頁面並正確渲染。
 
-如需暫時只開發前台或後台，也可以單獨啟動 `cms-api` 搭配其中一個 web 應用使用。
+兩個應用可獨立啟動，`portal-web` 不依賴 `portal-cms` 服務。
 
 ## 驗收標準
 
@@ -382,7 +355,7 @@ Spring Boot 內建的嵌入式伺服器預設為 8080，只要在設定檔覆寫
 ## 風險與注意事項
 
 - 不建議混用 JSP 與 Thymeleaf，會提高維護成本與模板複雜度。
-- 前台不得直接存取 CMS 資料庫，必須透過 API。
+- `portal-web` 只能以唯讀方式存取共用資料庫，禁止在前台 Service 層執行任何寫入操作。
 - 後台不可讓使用者任意輸入模板路徑，模板必須白名單化。
 - 發布資料應以版本快照保存，避免直接覆蓋正式內容。
 - 第一版避免過度設計，先完成可用 MVP，再補預覽、快取、審計與多語功能。
@@ -392,7 +365,7 @@ Spring Boot 內建的嵌入式伺服器預設為 8080，只要在設定檔覆寫
 本計畫名稱定為 **SpringSiteForge**，系統名稱如下：
 
 - 前台網站：`portal-web`
-- 後台控制頁面：`cms-web`
-- 後台 API：`cms-api`
+- 後台 CMS：`portal-cms`
+- 共用 JPA 模組：`portal-domain`（Maven 模組，不部署）
 
 此命名方式可同時保留業務語意與工程可讀性，適合作為 repository、artifact 與部署單位名稱。
