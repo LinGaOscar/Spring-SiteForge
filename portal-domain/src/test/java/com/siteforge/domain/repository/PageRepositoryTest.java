@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -66,7 +68,12 @@ class PageRepositoryTest {
         published.setLayoutSet(layoutSet); published.setStatus(PageStatus.PUBLISHED);
         pageRepository.save(published);
 
-        assertThat(pageRepository.findBySiteIdAndStatus(site.getId(), PageStatus.PUBLISHED)).hasSize(1);
-        assertThat(pageRepository.findBySiteIdAndStatus(site.getId(), PageStatus.DRAFT)).hasSize(1);
+        List<Page> publishedPages = pageRepository.findBySiteIdAndStatus(site.getId(), PageStatus.PUBLISHED);
+        assertThat(publishedPages).hasSize(1);
+        assertThat(publishedPages.get(0).getPath()).isEqualTo("/pub");
+
+        List<Page> draftPages = pageRepository.findBySiteIdAndStatus(site.getId(), PageStatus.DRAFT);
+        assertThat(draftPages).hasSize(1);
+        assertThat(draftPages.get(0).getPath()).isEqualTo("/draft");
     }
 }

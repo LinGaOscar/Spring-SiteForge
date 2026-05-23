@@ -16,9 +16,12 @@ public interface PageRepository extends JpaRepository<Page, Long> {
     @EntityGraph(attributePaths = {"site", "layoutSet"})
     Optional<Page> findById(Long id);
 
+    @EntityGraph(attributePaths = {"site", "layoutSet"})
     Optional<Page> findBySiteIdAndPath(Long siteId, String path);
 
+    @EntityGraph(attributePaths = {"site", "layoutSet"})
     List<Page> findBySiteIdAndStatus(Long siteId, PageStatus status);
 
+    @EntityGraph(attributePaths = {"site", "layoutSet"})
     List<Page> findBySiteId(Long siteId);
 }

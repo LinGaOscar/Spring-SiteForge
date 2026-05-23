@@ -61,7 +61,5 @@ public class Page {
     }
 
     @PreUpdate
-    void preUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+    void preUpdate() { updatedAt = LocalDateTime.now(); }
 }
