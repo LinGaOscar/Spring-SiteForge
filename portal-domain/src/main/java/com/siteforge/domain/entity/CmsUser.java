@@ -27,7 +27,7 @@ public class CmsUser {
     @Column(nullable = false)
     private Boolean enabled = true;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(
         name = "cms_user_role",
         joinColumns = @JoinColumn(name = "user_id"),
@@ -38,7 +38,7 @@ public class CmsUser {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     @PrePersist
