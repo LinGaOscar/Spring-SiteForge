@@ -10,6 +10,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class SwitchViewController {
 
+    @GetMapping("/mobile-required")
+    public String mobileRequired() {
+        return "error/mobile-required";
+    }
+
     private static final int COOKIE_MAX_AGE = 30 * 24 * 60 * 60; // 30 天
 
     @GetMapping("/switch-view")
