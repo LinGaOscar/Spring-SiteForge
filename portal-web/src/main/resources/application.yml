@@ -5,6 +5,18 @@ spring:
     open-in-view: false
   flyway:
     enabled: false
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: 6379
+  cache:
+    type: redis
+    redis:
+      time-to-live: 300000  # 5 分鐘，適合已發布頁面不常變動的特性
 
 server:
   port: 8100
+
+# CMS base URL：Dev 環境需指向 portal-cms (8200)；Docker 環境透過 Nginx 設為空字串即可
+cms:
+  asset-base-url: ""
