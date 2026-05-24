@@ -36,12 +36,15 @@ public class LocalStorageService implements StorageService {
         // 防止路徑穿越攻擊：RFC 7578 不保證 originalFilename 是純檔名
         String cleanedPath = StringUtils.cleanPath(
             file.getOriginalFilename() != null ? file.getOriginalFilename() : "");
-        // cleanPath 正規化後若仍含 ".." 代表有路徑穿越意圖，直接拒絕
+        // cleanPath 正規化後仍含 ".." 或 "\" 代表有路徑穿越意圖
         if (cleanedPath.contains("..") || cleanedPath.contains("\\"))
             throw new IllegalArgumentException("Invalid filename: " + cleanedPath);
         String baseName = cleanedPath.contains("/")
             ? cleanedPath.substring(cleanedPath.lastIndexOf('/') + 1)
             : cleanedPath;
+        // baseName 不應含路徑分隔符（防禦性驗證）
+        if (baseName.contains("/") || baseName.contains("\\"))
+            throw new IllegalArgumentException("Invalid filename: " + baseName);
 
         String mimeType = file.getContentType();
         if (mimeType == null || !ALLOWED_MIME_TYPES.contains(mimeType))
