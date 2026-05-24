@@ -63,12 +63,23 @@ class LocalStorageServiceTest {
     }
 
     @Test
-    void store_filenameWithoutExtension_usesBinExtension() {
+    void store_unsupportedExtension_throwsIllegalArgument() {
+        MockMultipartFile file = new MockMultipartFile(
+            "file", "script.svg", "image/svg+xml", "<svg/>".getBytes());
+
+        assertThatThrownBy(() -> storageService.store(file))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Unsupported file type");
+    }
+
+    @Test
+    void store_filenameWithoutExtension_throwsIllegalArgument() {
+        // 無副檔名時 extractExtension 回傳 "bin"，不在白名單內應拒絕
         MockMultipartFile file = new MockMultipartFile(
             "file", "noext", "image/jpeg", "jpg-bytes".getBytes());
 
-        StorageResult result = storageService.store(file);
-
-        assertThat(result.filePath()).endsWith(".bin");
+        assertThatThrownBy(() -> storageService.store(file))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Unsupported file extension");
     }
 }

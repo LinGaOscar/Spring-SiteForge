@@ -17,7 +17,11 @@ import java.util.UUID;
 public class LocalStorageService implements StorageService {
 
     private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
-        "image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"
+        "image/jpeg", "image/png", "image/gif", "image/webp"
+    );
+
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
+        "jpg", "jpeg", "png", "gif", "webp"
     );
 
     @Value("${storage.upload-dir}")
@@ -30,11 +34,14 @@ public class LocalStorageService implements StorageService {
         String mimeType = file.getContentType();
         if (mimeType == null || !ALLOWED_MIME_TYPES.contains(mimeType))
             throw new IllegalArgumentException("Unsupported file type: " + mimeType);
+        String ext = extractExtension(file.getOriginalFilename());
+        if (!ALLOWED_EXTENSIONS.contains(ext))
+            throw new IllegalArgumentException("Unsupported file extension: " + ext);
 
         LocalDate today = LocalDate.now();
         String subPath = today.getYear() + "/"
             + String.format("%02d", today.getMonthValue()) + "/"
-            + UUID.randomUUID() + "." + extractExtension(file.getOriginalFilename());
+            + UUID.randomUUID() + "." + ext;
 
         Path target = Paths.get(uploadDir).resolve(subPath);
         try {
