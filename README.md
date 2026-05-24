@@ -41,67 +41,29 @@ spring-siteforge/
 
 ## 資料庫 Schema
 
+詳細資料表定義請參閱 [docs/database.md](docs/database.md)。
+
 ```
 site
- └── page  (status, seo, layout_set_id)
-      ├── page_content  (block key + content JSON)
-      └── page_version  (snapshot JSON, draft/published)
+ └── page
+      ├── page_content
+      └── page_version
 
-layout_set  (header / body / footer template key)
-asset       (file_path, mime_type, size, created_by)
+layout_set ←── page
+asset
 cms_user ── cms_role
 ```
-
-所有主要資料表含 `created_at`、`updated_at`、`created_by` audit 欄位。
-
-Flyway migration 腳本位於 `portal-cms/src/main/resources/db/migration/`：
-
-| 版本 | 內容 |
-|------|------|
-| V1 | `cms_user`、`cms_role` |
-| V2 | `site`、`layout_set` |
-| V3 | `page`、`page_content` |
-| V4 | `page_version`、`asset` |
 
 ---
 
 ## API 路由
 
-### 前台 Public API（portal-web，唯讀）
+完整 API 文件請參閱 [docs/api.md](docs/api.md)。
 
-```
-GET  /api/pages/search
-GET  /api/pages/{path}
-GET  /api/assets/{id}
-```
-
-### CMS API（portal-cms，需 JWT）
-
-```
-POST /api/cms/auth/login
-
-GET    /api/cms/layouts
-POST   /api/cms/layouts
-PUT    /api/cms/layouts/{id}
-
-GET    /api/cms/pages
-POST   /api/cms/pages
-GET    /api/cms/pages/{id}
-PUT    /api/cms/pages/{id}
-DELETE /api/cms/pages/{id}
-POST   /api/cms/pages/{id}/publish
-POST   /api/cms/pages/{id}/rollback
-GET    /api/cms/pages/{id}/versions
-
-GET    /api/cms/pages/{pageId}/contents
-POST   /api/cms/pages/{pageId}/contents
-PUT    /api/cms/pages/{pageId}/contents/{contentId}
-DELETE /api/cms/pages/{pageId}/contents/{contentId}
-
-GET    /api/cms/assets
-POST   /api/cms/assets
-POST   /api/cms/assets/upload   ← multipart 圖片上傳（10MB 上限）
-```
+| 分類 | 前綴 | 應用 |
+|------|------|------|
+| 前台 Public | `/api/` | portal-web (8100) |
+| CMS | `/api/cms/` | portal-cms (8200) |
 
 ---
 
@@ -187,16 +149,6 @@ mvn test
 mvn test -pl portal-cms
 mvn test -pl portal-domain
 ```
-
----
-
-## 圖片上傳
-
-上傳的圖片存放於 `portal-cms` 啟動目錄下的 `./uploads/{year}/{mm}/{uuid}.{ext}`。
-
-支援格式：`image/jpeg`、`image/png`、`image/gif`、`image/webp`（最大 10MB）
-
-上傳後可透過 `http://localhost:8200/uploads/{year}/{mm}/{uuid}.{ext}` 存取。
 
 ---
 
