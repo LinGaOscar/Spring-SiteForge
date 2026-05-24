@@ -1,19 +1,12 @@
 package com.siteforge.domain.entity;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Entity
-@Table(name = "cms_role")
-@Getter @Setter @NoArgsConstructor
+/**
+ * 已由 CmsUserRole enum + cms_user_role @ElementCollection 取代。
+ * 保留此類別避免舊版編譯錯誤，不對應任何資料表。
+ */
+@Deprecated
 public class CmsRole {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false, unique = true, length = 50)
     private String name;
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 }

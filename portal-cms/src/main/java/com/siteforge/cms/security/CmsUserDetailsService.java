@@ -1,6 +1,5 @@
 package com.siteforge.cms.security;
 
-import com.siteforge.domain.entity.CmsRole;
 import com.siteforge.domain.entity.CmsUser;
 import com.siteforge.domain.repository.CmsUserRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-
 @Service
 @RequiredArgsConstructor
 public class CmsUserDetailsService implements UserDetailsService {
@@ -20,14 +18,12 @@ public class CmsUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        // 從資料庫查詢使用者，找不到則拋出標準 Spring Security 例外
         CmsUser user = userRepository.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        // 將 CmsRole 集合轉換為 Spring Security 的 GrantedAuthority
+        // 將 CmsUserRole enum 轉為 Spring Security GrantedAuthority（格式：ROLE_MA、ROLE_OP）
         var authorities = user.getRoles().stream()
-            .map(CmsRole::getName)
-            .map(SimpleGrantedAuthority::new)
+            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
             .toList();
 
         return User.builder()

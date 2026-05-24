@@ -1,10 +1,8 @@
 package com.siteforge.domain.repository;
 
-import com.siteforge.domain.entity.CmsRole;
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.Optional;
-
-public interface CmsRoleRepository extends JpaRepository<CmsRole, Long> {
-    Optional<CmsRole> findByName(String name);
+/**
+ * 已由 CmsUserRole enum 取代，保留避免舊版編譯錯誤。
+ */
+@Deprecated
+public interface CmsRoleRepository {
 }

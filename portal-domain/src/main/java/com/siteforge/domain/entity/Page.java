@@ -38,9 +38,22 @@ public class Page {
     @JoinColumn(name = "layout_set_id")
     private LayoutSet layoutSet;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "unit_code", referencedColumnName = "code")
+    private Unit unit;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private PageStatus status = PageStatus.DRAFT;
+
+    @Column(name = "review_note", length = 500)
+    private String reviewNote;
+
+    @Column(name = "submitted_at")
+    private LocalDateTime submittedAt;
+
+    @Column(name = "submitted_by", length = 100)
+    private String submittedBy;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

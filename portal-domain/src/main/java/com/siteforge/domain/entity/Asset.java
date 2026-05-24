@@ -27,11 +27,18 @@ public class Asset {
 
     private Long size;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "unit_code", referencedColumnName = "code")
+    private Unit unit;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "created_by", length = 100)
     private String createdBy;
+
+    @Column(name = "uploaded_by", length = 100)
+    private String uploadedBy;
 
     @PrePersist
     void prePersist() { createdAt = LocalDateTime.now(); }
