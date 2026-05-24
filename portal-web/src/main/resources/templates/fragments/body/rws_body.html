@@ -2,53 +2,178 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="body">
-    <!-- 手機版主體：單欄排列，字體與間距針對觸控優化 -->
+
+    <!-- DB 內容區塊（有 pageContents 時渲染） -->
     <div th:if="${pageContents != null and !pageContents.isEmpty()}">
         <div th:each="block : ${pageContents}">
 
-            <!-- hero 區塊 -->
-            <section th:if="${block.blockKey == 'hero'}" class="py-4 bg-light text-center px-3">
-                <h1 class="fs-3 fw-bold mb-2"
-                    th:text="${block.contentMap?.title ?: page?.title}">標題</h1>
-                <p class="text-muted mb-3"
-                   th:text="${block.contentMap?.subtitle}"></p>
+            <!-- 活動 Hero -->
+            <section th:if="${block.blockKey == 'hero'}"
+                     class="text-white text-center py-5 px-3"
+                     th:style="${block.contentMap?.bgColor != null ? 'background:' + block.contentMap.bgColor : 'background: linear-gradient(135deg,#1a1a2e,#16213e)'}">
+                <div th:if="${block.contentMap?.badge}"
+                     class="badge bg-warning text-dark mb-3 px-3 py-2 fs-6"
+                     th:text="${block.contentMap.badge}"></div>
+                <h1 class="display-6 fw-bold mb-2"
+                    th:text="${block.contentMap?.title ?: page?.title}">活動標題</h1>
+                <p class="mb-1 opacity-75" th:text="${block.contentMap?.subtitle}"></p>
+                <p th:if="${block.contentMap?.deadline}"
+                   class="small opacity-50 mb-4"
+                   th:text="${block.contentMap.deadline}"></p>
                 <a th:if="${block.contentMap?.ctaUrl}"
                    th:href="${block.contentMap.ctaUrl}"
-                   class="btn btn-primary btn-lg w-100"
-                   th:text="${block.contentMap?.ctaText ?: '了解更多'}">了解更多</a>
+                   class="btn btn-warning btn-lg w-100 fw-bold"
+                   th:text="${block.contentMap?.ctaText ?: '立即參加'}">立即參加</a>
             </section>
 
-            <!-- content 文字區塊 -->
-            <section th:if="${block.blockKey == 'content'}" class="py-4 px-3">
+            <!-- 活動優惠列表 -->
+            <section th:if="${block.blockKey == 'offers'}" class="py-4 px-3">
                 <h2 th:if="${block.contentMap?.title}"
-                    class="fs-4 mb-3" th:text="${block.contentMap.title}"></h2>
-                <div th:if="${block.contentMap?.html}"
-                     th:utext="${block.contentMap.html}"></div>
-                <p th:if="${block.contentMap?.text}"
-                   class="text-muted" th:text="${block.contentMap.text}"></p>
-            </section>
-
-            <!-- features 特色列表（單欄） -->
-            <section th:if="${block.blockKey == 'features'}" class="py-4 bg-light px-3">
-                <h2 th:if="${block.contentMap?.title}"
-                    class="fs-4 text-center mb-4" th:text="${block.contentMap.title}"></h2>
+                    class="fs-5 fw-bold mb-3" th:text="${block.contentMap.title}"></h2>
                 <div class="d-flex flex-column gap-3">
                     <div class="card border-0 shadow-sm" th:each="item : ${block.contentMap?.items}">
-                        <div class="card-body py-3">
-                            <h6 class="card-title mb-1" th:text="${item.title}"></h6>
-                            <p class="card-text text-muted small mb-0" th:text="${item.desc}"></p>
+                        <div class="card-body d-flex align-items-center gap-3 py-3">
+                            <div class="fs-3 flex-shrink-0" th:text="${item.icon}">🎁</div>
+                            <div>
+                                <div class="fw-semibold" th:text="${item.title}"></div>
+                                <div class="text-muted small" th:text="${item.desc}"></div>
+                            </div>
+                            <span th:if="${item.tag}"
+                                  class="badge bg-danger ms-auto flex-shrink-0"
+                                  th:text="${item.tag}"></span>
                         </div>
                     </div>
                 </div>
             </section>
 
+            <!-- 倒數計時或截止提示 -->
+            <section th:if="${block.blockKey == 'countdown'}"
+                     class="py-3 px-3 bg-danger text-white text-center">
+                <p class="mb-0 fw-bold" th:text="${block.contentMap?.message}">活動限時優惠，把握機會！</p>
+            </section>
+
+            <!-- 步驟說明 -->
+            <section th:if="${block.blockKey == 'steps'}" class="py-4 px-3 bg-light">
+                <h2 th:if="${block.contentMap?.title}"
+                    class="fs-5 fw-bold text-center mb-4" th:text="${block.contentMap.title}"></h2>
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-start gap-3" th:each="step, iter : ${block.contentMap?.items}">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width:2rem;height:2rem;font-size:.875rem;font-weight:700"
+                             th:text="${iter.index + 1}"></div>
+                        <div>
+                            <div class="fw-semibold" th:text="${step.title}"></div>
+                            <div class="text-muted small" th:text="${step.desc}"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 底部固定 CTA -->
+            <section th:if="${block.blockKey == 'cta'}" class="py-4 px-3 text-center">
+                <p th:if="${block.contentMap?.text}"
+                   class="text-muted small mb-3" th:text="${block.contentMap.text}"></p>
+                <a th:if="${block.contentMap?.ctaUrl}"
+                   th:href="${block.contentMap.ctaUrl}"
+                   class="btn btn-primary btn-lg w-100 fw-bold"
+                   th:text="${block.contentMap?.ctaText ?: '立即參加'}">立即參加</a>
+            </section>
+
         </div>
     </div>
 
-    <!-- 無內容時的預設畫面 -->
-    <div th:if="${pageContents == null or pageContents.isEmpty()}"
-         class="py-5 text-center text-muted px-3">
-        <p>此頁面尚無內容。</p>
+    <!-- 範例行銷頁（無 DB 內容時顯示） -->
+    <div th:if="${pageContents == null or pageContents.isEmpty()}">
+
+        <!-- Hero 活動橫幅 -->
+        <section class="text-white text-center py-5 px-3"
+                 style="background: linear-gradient(135deg,#1a1a2e,#16213e)">
+            <div class="badge bg-warning text-dark mb-3 px-3 py-2 fs-6">🔥 限時活動</div>
+            <h1 class="display-6 fw-bold mb-2">春季品牌升級方案</h1>
+            <p class="mb-1 opacity-75">官網建置 + CMS 系統，一次到位</p>
+            <p class="small opacity-50 mb-4">活動截止：2026/06/30</p>
+            <a href="/contact" class="btn btn-warning btn-lg w-100 fw-bold">立即預約諮詢</a>
+        </section>
+
+        <!-- 優惠內容 -->
+        <section class="py-4 px-3">
+            <h2 class="fs-5 fw-bold mb-3">活動優惠內容</h2>
+            <div class="d-flex flex-column gap-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body d-flex align-items-center gap-3 py-3">
+                        <div class="fs-3 flex-shrink-0">🎨</div>
+                        <div>
+                            <div class="fw-semibold">品牌視覺設計</div>
+                            <div class="text-muted small">Logo + 色彩規範 + 字型系統</div>
+                        </div>
+                        <span class="badge bg-danger ms-auto flex-shrink-0">贈送</span>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body d-flex align-items-center gap-3 py-3">
+                        <div class="fs-3 flex-shrink-0">⚡</div>
+                        <div>
+                            <div class="fw-semibold">快速上線</div>
+                            <div class="text-muted small">14 個工作天完成建置</div>
+                        </div>
+                        <span class="badge bg-warning text-dark ms-auto flex-shrink-0">保證</span>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body d-flex align-items-center gap-3 py-3">
+                        <div class="fs-3 flex-shrink-0">🛡️</div>
+                        <div>
+                            <div class="fw-semibold">一年免費維護</div>
+                            <div class="text-muted small">含內容更新與技術支援</div>
+                        </div>
+                        <span class="badge bg-success ms-auto flex-shrink-0">加值</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 限時提示 -->
+        <section class="py-3 px-3 bg-danger text-white text-center">
+            <p class="mb-0 fw-bold">⏰ 前 20 名享額外 15% 折扣，剩餘名額有限！</p>
+        </section>
+
+        <!-- 步驟說明 -->
+        <section class="py-4 px-3 bg-light">
+            <h2 class="fs-5 fw-bold text-center mb-4">如何參加</h2>
+            <div class="d-flex flex-column gap-3">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width:2rem;height:2rem;font-size:.875rem;font-weight:700">1</div>
+                    <div>
+                        <div class="fw-semibold">填寫諮詢表單</div>
+                        <div class="text-muted small">告訴我們您的需求與預算</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width:2rem;height:2rem;font-size:.875rem;font-weight:700">2</div>
+                    <div>
+                        <div class="fw-semibold">專人回電確認</div>
+                        <div class="text-muted small">1 個工作天內回覆</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width:2rem;height:2rem;font-size:.875rem;font-weight:700">3</div>
+                    <div>
+                        <div class="fw-semibold">確認方案，開始執行</div>
+                        <div class="text-muted small">簽約後 14 天正式上線</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 底部 CTA -->
+        <section class="py-4 px-3 text-center">
+            <p class="text-muted small mb-3">僅限 2026/06/30 前報名，額滿為止</p>
+            <a href="/contact" class="btn btn-primary btn-lg w-100 fw-bold">立即預約 →</a>
+        </section>
+
     </div>
 </div>
 </body>

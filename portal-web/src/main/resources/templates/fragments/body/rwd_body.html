@@ -2,31 +2,34 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="body">
-    <!-- 桌面版主體：依 pageContents 區塊順序渲染 -->
+
+    <!-- DB 內容區塊（有 pageContents 時渲染） -->
     <div th:if="${pageContents != null and !pageContents.isEmpty()}">
         <div th:each="block : ${pageContents}">
 
-            <!-- hero 區塊 -->
             <section th:if="${block.blockKey == 'hero'}" class="py-5 bg-light">
-                <div class="container">
+                <div class="container py-3">
                     <div class="row align-items-center g-5">
                         <div class="col-lg-6">
                             <h1 class="display-5 fw-bold lh-1 mb-3"
                                 th:text="${block.contentMap?.title ?: page?.title}">標題</h1>
-                            <p class="col-lg-10 fs-4 text-muted"
+                            <p class="fs-5 text-muted mb-4"
                                th:text="${block.contentMap?.subtitle}"></p>
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-4">
+                            <div class="d-flex gap-3 flex-wrap">
                                 <a th:if="${block.contentMap?.ctaUrl}"
                                    th:href="${block.contentMap.ctaUrl}"
-                                   class="btn btn-primary btn-lg px-4 me-md-2"
+                                   class="btn btn-primary btn-lg"
                                    th:text="${block.contentMap?.ctaText ?: '了解更多'}">了解更多</a>
+                                <a th:if="${block.contentMap?.secondaryUrl}"
+                                   th:href="${block.contentMap.secondaryUrl}"
+                                   class="btn btn-outline-secondary btn-lg"
+                                   th:text="${block.contentMap?.secondaryText ?: '聯絡我們'}">聯絡我們</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- content 文字區塊 -->
             <section th:if="${block.blockKey == 'content'}" class="py-5">
                 <div class="container">
                     <div class="row justify-content-center">
@@ -42,15 +45,17 @@
                 </div>
             </section>
 
-            <!-- features 特色列表 -->
             <section th:if="${block.blockKey == 'features'}" class="py-5 bg-light">
                 <div class="container">
                     <h2 th:if="${block.contentMap?.title}"
-                        class="text-center mb-5" th:text="${block.contentMap.title}"></h2>
+                        class="text-center mb-2" th:text="${block.contentMap.title}"></h2>
+                    <p th:if="${block.contentMap?.subtitle}"
+                       class="text-center text-muted mb-5" th:text="${block.contentMap.subtitle}"></p>
                     <div class="row g-4 row-cols-1 row-cols-md-3">
                         <div class="col" th:each="item : ${block.contentMap?.items}">
-                            <div class="card h-100 border-0 shadow-sm">
-                                <div class="card-body p-4">
+                            <div class="card h-100 border-0 shadow-sm p-2">
+                                <div class="card-body">
+                                    <div class="fs-2 mb-2" th:text="${item.icon}"></div>
                                     <h5 class="card-title" th:text="${item.title}"></h5>
                                     <p class="card-text text-muted" th:text="${item.desc}"></p>
                                 </div>
@@ -60,13 +65,131 @@
                 </div>
             </section>
 
+            <section th:if="${block.blockKey == 'stats'}" class="py-4 bg-dark text-white">
+                <div class="container">
+                    <div class="row text-center g-4">
+                        <div class="col-6 col-md-3" th:each="s : ${block.contentMap?.items}">
+                            <div class="fs-2 fw-bold text-primary" th:text="${s.value}"></div>
+                            <div class="small text-white-50" th:text="${s.label}"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section th:if="${block.blockKey == 'cta'}" class="py-5 text-center">
+                <div class="container">
+                    <h2 th:if="${block.contentMap?.title}"
+                        class="mb-3" th:text="${block.contentMap.title}"></h2>
+                    <p th:if="${block.contentMap?.subtitle}"
+                       class="text-muted mb-4" th:text="${block.contentMap.subtitle}"></p>
+                    <a th:if="${block.contentMap?.ctaUrl}"
+                       th:href="${block.contentMap.ctaUrl}"
+                       class="btn btn-primary btn-lg px-5"
+                       th:text="${block.contentMap?.ctaText ?: '立即開始'}">立即開始</a>
+                </div>
+            </section>
+
         </div>
     </div>
 
-    <!-- 無內容時的預設畫面 -->
-    <div th:if="${pageContents == null or pageContents.isEmpty()}"
-         class="container py-5 text-center text-muted">
-        <p>此頁面尚無內容。</p>
+    <!-- 範例頁面（無 DB 內容時顯示，供版面確認使用） -->
+    <div th:if="${pageContents == null or pageContents.isEmpty()}">
+
+        <!-- Hero -->
+        <section class="py-5 bg-light">
+            <div class="container py-3">
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-6">
+                        <span class="badge bg-primary mb-3">企業官網 CMS 平台</span>
+                        <h1 class="display-5 fw-bold lh-1 mb-3">專業網站，從這裡開始</h1>
+                        <p class="fs-5 text-muted mb-4">
+                            SpringSiteForge 提供完整的內容管理解決方案，讓您的品牌形象在數位世界精準呈現。
+                        </p>
+                        <div class="d-flex gap-3 flex-wrap">
+                            <a href="/contact" class="btn btn-primary btn-lg">立即諮詢</a>
+                            <a href="/services" class="btn btn-outline-secondary btn-lg">服務項目</a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 text-center">
+                        <div class="bg-white rounded-4 shadow p-5 d-inline-block">
+                            <div class="fs-1">🌐</div>
+                            <p class="text-muted small mt-2 mb-0">企業形象網站</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="py-4 bg-dark text-white">
+            <div class="container">
+                <div class="row text-center g-4">
+                    <div class="col-6 col-md-3">
+                        <div class="fs-2 fw-bold text-primary">500+</div>
+                        <div class="small text-white-50">成功案例</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="fs-2 fw-bold text-primary">99.9%</div>
+                        <div class="small text-white-50">服務可用性</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="fs-2 fw-bold text-primary">24hr</div>
+                        <div class="small text-white-50">技術支援</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="fs-2 fw-bold text-primary">10年</div>
+                        <div class="small text-white-50">產業經驗</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="py-5 bg-light">
+            <div class="container">
+                <h2 class="text-center mb-2">核心服務</h2>
+                <p class="text-center text-muted mb-5">為您的企業打造量身定制的數位解決方案</p>
+                <div class="row g-4 row-cols-1 row-cols-md-3">
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm p-2">
+                            <div class="card-body">
+                                <div class="fs-2 mb-2">🎨</div>
+                                <h5 class="card-title">品牌形象設計</h5>
+                                <p class="card-text text-muted">從 Logo 到整體視覺規範，建立一致的品牌識別系統。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm p-2">
+                            <div class="card-body">
+                                <div class="fs-2 mb-2">⚙️</div>
+                                <h5 class="card-title">CMS 內容管理</h5>
+                                <p class="card-text text-muted">直覺操作的後台，讓行銷團隊自主更新網站內容。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm p-2">
+                            <div class="card-body">
+                                <div class="fs-2 mb-2">📊</div>
+                                <h5 class="card-title">數據分析整合</h5>
+                                <p class="card-text text-muted">串接 GA4 與 CRM，掌握訪客行為與轉換漏斗。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="py-5 text-center">
+            <div class="container">
+                <h2 class="mb-3">準備好打造您的專業官網了嗎？</h2>
+                <p class="text-muted mb-4">立即聯繫我們，取得免費諮詢與報價。</p>
+                <a href="/contact" class="btn btn-primary btn-lg px-5">免費諮詢</a>
+            </div>
+        </section>
+
     </div>
 </div>
 </body>
