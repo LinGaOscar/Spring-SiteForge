@@ -9,14 +9,7 @@
 
 ## 開發機：建置與打包
 
-### 1. 設定環境變數
-
-```bash
-cp .env.example .env
-# 編輯 .env，填入正式環境的 DB 密碼
-```
-
-### 2. 建置 Docker Image
+### 1. 建置 Docker Image
 
 ```bash
 docker compose -f docker-compose.prod.yml build
@@ -37,8 +30,12 @@ docker save spring-siteforge-portal-web:latest | gzip > portal-web.tar.gz
 
 ### 5. 傳輸到目標伺服器
 
+傳輸 Image 與設定檔，**不傳 `.env`**（密碼須在伺服器上直接建立）：
+
 ```bash
 scp portal-cms.tar.gz portal-web.tar.gz user@server:/opt/siteforge/
+scp docker-compose.prod.yml user@server:/opt/siteforge/
+scp docker/nginx.conf user@server:/opt/siteforge/docker/
 ```
 
 > 也可使用 FTP、隨身碟或公司內部檔案共享，傳輸方式不限。
@@ -58,31 +55,28 @@ docker load < /opt/siteforge/portal-cms.tar.gz
 docker load < /opt/siteforge/portal-web.tar.gz
 ```
 
-### 2. 準備設定檔
+### 2. 在伺服器上直接建立 .env
 
-將以下檔案複製到伺服器工作目錄：
-
-```
-docker-compose.prod.yml
-docker/nginx.conf
-.env
-```
-
-### 3. 設定 .env
+> 公司規定密碼只能在正式環境填入，`.env` 不經過任何傳輸媒介。
 
 ```bash
+ssh user@server
+cd /opt/siteforge
+
+cat > .env << 'EOF'
 POSTGRES_DB=siteforge_db
 POSTGRES_USER=siteforge
-POSTGRES_PASSWORD=your_real_password
+POSTGRES_PASSWORD=正式密碼填這裡
+EOF
 ```
 
-### 4. 啟動所有服務
+### 3. 啟動所有服務
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-### 5. 確認服務狀態
+### 4. 確認服務狀態
 
 ```bash
 docker compose -f docker-compose.prod.yml ps
@@ -92,13 +86,18 @@ docker compose -f docker-compose.prod.yml ps
 
 ## 更新版本
 
+`.env` 已在伺服器上，更新時不需重新建立，只傳 Image 即可：
+
 ```bash
 # 開發機：重新 build 並打包
 docker compose -f docker-compose.prod.yml build
 docker save spring-siteforge-portal-cms:latest | gzip > portal-cms.tar.gz
 docker save spring-siteforge-portal-web:latest | gzip > portal-web.tar.gz
 
-# 傳輸後，目標伺服器執行：
+# 傳輸（不傳 .env）
+scp portal-cms.tar.gz portal-web.tar.gz user@server:/opt/siteforge/
+
+# 目標伺服器執行
 docker load < portal-cms.tar.gz
 docker load < portal-web.tar.gz
 docker compose -f docker-compose.prod.yml up -d --no-build
