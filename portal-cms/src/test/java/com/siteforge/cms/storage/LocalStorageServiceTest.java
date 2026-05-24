@@ -90,7 +90,8 @@ class LocalStorageServiceTest {
             "file", "../../etc/passwd.png", "image/png", "fake".getBytes());
 
         assertThatThrownBy(() -> storageService.store(file))
-            .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Invalid filename");
     }
 
     @Test
