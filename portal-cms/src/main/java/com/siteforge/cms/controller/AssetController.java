@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,5 +29,12 @@ public class AssetController {
     public ApiResponse<AssetResponse> create(@RequestBody AssetRequest request,
                                               Authentication authentication) {
         return ApiResponse.ok(assetService.create(request, authentication.getName()));
+    }
+
+    @PostMapping("/upload")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<AssetResponse> upload(@RequestParam("file") MultipartFile file,
+                                              Authentication authentication) {
+        return ApiResponse.ok(assetService.upload(file, authentication.getName()));
     }
 }

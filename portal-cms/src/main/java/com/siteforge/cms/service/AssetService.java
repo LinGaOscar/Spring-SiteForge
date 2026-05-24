@@ -2,11 +2,14 @@ package com.siteforge.cms.service;
 
 import com.siteforge.cms.dto.AssetRequest;
 import com.siteforge.cms.dto.AssetResponse;
+import com.siteforge.cms.storage.StorageResult;
+import com.siteforge.cms.storage.StorageService;
 import com.siteforge.domain.entity.Asset;
 import com.siteforge.domain.repository.AssetRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,6 +19,7 @@ import java.util.List;
 public class AssetService {
 
     private final AssetRepository assetRepository;
+    private final StorageService storageService;
 
     @Transactional(readOnly = true)
     public List<AssetResponse> findAll() {
@@ -34,6 +38,17 @@ public class AssetService {
         asset.setFilePath(request.getFilePath());
         asset.setMimeType(request.getMimeType());
         asset.setSize(request.getSize());
+        asset.setCreatedBy(username);
+        return toResponse(assetRepository.save(asset));
+    }
+
+    public AssetResponse upload(MultipartFile file, String username) {
+        StorageResult result = storageService.store(file);
+        Asset asset = new Asset();
+        asset.setFilename(result.originalFilename());
+        asset.setFilePath(result.filePath());
+        asset.setMimeType(result.mimeType());
+        asset.setSize(result.size());
         asset.setCreatedBy(username);
         return toResponse(assetRepository.save(asset));
     }

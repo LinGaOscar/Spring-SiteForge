@@ -2,6 +2,8 @@ package com.siteforge.cms.service;
 
 import com.siteforge.cms.dto.AssetRequest;
 import com.siteforge.cms.dto.AssetResponse;
+import com.siteforge.cms.storage.StorageResult;
+import com.siteforge.cms.storage.StorageService;
 import com.siteforge.domain.entity.Asset;
 import com.siteforge.domain.repository.AssetRepository;
 import org.junit.jupiter.api.Test;
@@ -9,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +25,7 @@ import static org.mockito.Mockito.when;
 class AssetServiceTest {
 
     @Mock AssetRepository assetRepository;
+    @Mock StorageService storageService;
     @InjectMocks AssetService assetService;
 
     @Test
@@ -72,5 +76,28 @@ class AssetServiceTest {
         when(assetRepository.findAllByOrderByCreatedAtDesc()).thenReturn(List.of(a));
 
         assertThat(assetService.findAll()).hasSize(1);
+    }
+
+    @Test
+    void upload_validFile_storesFileAndSavesAsset() {
+        MockMultipartFile file = new MockMultipartFile(
+            "file", "banner.png", "image/png", "fake-bytes".getBytes());
+
+        StorageResult result = new StorageResult(
+            "banner.png", "/uploads/2026/05/uuid.png", "image/png", 10L);
+        when(storageService.store(file)).thenReturn(result);
+
+        Asset saved = new Asset();
+        saved.setId(2L); saved.setFilename("banner.png");
+        saved.setFilePath("/uploads/2026/05/uuid.png"); saved.setMimeType("image/png");
+        saved.setSize(10L); saved.setCreatedBy("editor");
+        saved.setCreatedAt(LocalDateTime.now());
+        when(assetRepository.save(any())).thenReturn(saved);
+
+        AssetResponse response = assetService.upload(file, "editor");
+        assertThat(response.id()).isEqualTo(2L);
+        assertThat(response.filename()).isEqualTo("banner.png");
+        assertThat(response.filePath()).isEqualTo("/uploads/2026/05/uuid.png");
+        assertThat(response.createdBy()).isEqualTo("editor");
     }
 }
