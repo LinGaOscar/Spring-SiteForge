@@ -74,12 +74,35 @@ class LocalStorageServiceTest {
 
     @Test
     void store_filenameWithoutExtension_throwsIllegalArgument() {
-        // 無副檔名時 extractExtension 回傳 "bin"，不在白名單內應拒絕
+        // 無副檔名時 extractExtension 應直接拋出例外，訊息包含 "missing"
         MockMultipartFile file = new MockMultipartFile(
             "file", "noext", "image/jpeg", "jpg-bytes".getBytes());
 
         assertThatThrownBy(() -> storageService.store(file))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Unsupported file extension");
+            .hasMessageContaining("missing");
+    }
+
+    @Test
+    void store_traversalFilename_throwsIllegalArgument() {
+        // 路徑穿越攻擊：../../etc/passwd.png 應被清理後偵測並拒絕
+        MockMultipartFile file = new MockMultipartFile(
+            "file", "../../etc/passwd.png", "image/png", "fake".getBytes());
+
+        assertThatThrownBy(() -> storageService.store(file))
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void store_mimeExtensionMismatch_isAccepted() {
+        // 當前設計僅進行白名單檢查，不交叉驗證 MIME 與副檔名
+        // 此測試錨定現有行為，未來若要強化可明確修改
+        MockMultipartFile file = new MockMultipartFile(
+            "file", "image.png", "image/jpeg", "fake-jpeg-bytes".getBytes());
+
+        StorageResult result = storageService.store(file);
+
+        assertThat(result.mimeType()).isEqualTo("image/jpeg");
+        assertThat(result.filePath()).endsWith(".png");
     }
 }

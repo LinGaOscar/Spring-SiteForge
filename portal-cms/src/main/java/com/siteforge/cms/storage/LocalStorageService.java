@@ -2,6 +2,7 @@ package com.siteforge.cms.storage;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -31,10 +32,21 @@ public class LocalStorageService implements StorageService {
     public StorageResult store(MultipartFile file) {
         if (file == null || file.isEmpty())
             throw new IllegalArgumentException("File must not be empty");
+
+        // 防止路徑穿越攻擊：RFC 7578 不保證 originalFilename 是純檔名
+        String cleanedPath = StringUtils.cleanPath(
+            file.getOriginalFilename() != null ? file.getOriginalFilename() : "");
+        // cleanPath 正規化後若仍含 ".." 代表有路徑穿越意圖，直接拒絕
+        if (cleanedPath.contains("..") || cleanedPath.contains("\\"))
+            throw new IllegalArgumentException("Invalid filename: " + cleanedPath);
+        String baseName = cleanedPath.contains("/")
+            ? cleanedPath.substring(cleanedPath.lastIndexOf('/') + 1)
+            : cleanedPath;
+
         String mimeType = file.getContentType();
         if (mimeType == null || !ALLOWED_MIME_TYPES.contains(mimeType))
             throw new IllegalArgumentException("Unsupported file type: " + mimeType);
-        String ext = extractExtension(file.getOriginalFilename());
+        String ext = extractExtension(baseName);
         if (!ALLOWED_EXTENSIONS.contains(ext))
             throw new IllegalArgumentException("Unsupported file extension: " + ext);
 
@@ -52,7 +64,7 @@ public class LocalStorageService implements StorageService {
         }
 
         return new StorageResult(
-            file.getOriginalFilename(),
+            baseName,
             "/uploads/" + subPath,
             mimeType,
             file.getSize()
@@ -60,7 +72,9 @@ public class LocalStorageService implements StorageService {
     }
 
     private String extractExtension(String filename) {
-        if (filename == null || !filename.contains(".")) return "bin";
+        // 無副檔名無法進行白名單比對，直接拒絕而非回傳模糊的 "bin"
+        if (filename == null || !filename.contains("."))
+            throw new IllegalArgumentException("File extension is missing");
         return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
     }
 }
