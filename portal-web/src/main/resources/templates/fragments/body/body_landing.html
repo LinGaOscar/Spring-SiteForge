@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="body">
+    <!-- Landing Page：全寬無容器限制 -->
+    <div th:if="${pageContents}" th:each="content : ${pageContents}">
+        <div th:text="${content.contentJson}"></div>
+    </div>
+</div>
+</body>
+</html>
