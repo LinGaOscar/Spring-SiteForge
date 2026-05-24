@@ -139,6 +139,14 @@ mvn spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
 
 ---
 
+## 正式部署
+
+完整部署步驟請參閱 [docs/deployment.md](docs/deployment.md)。
+
+部署方式：開發機 build → 打包成 `.tar.gz` → 傳輸到伺服器 → `docker load` → 啟動。
+
+---
+
 ## 執行測試
 
 ```bash
