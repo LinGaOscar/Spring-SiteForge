@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="header">
+    <!-- 手機版 Header：固定頂部，漢堡選單展開為全屏 -->
+    <nav class="navbar navbar-dark bg-dark sticky-top">
+        <div class="container-fluid px-3">
+            <a class="navbar-brand fw-bold" th:href="@{/}">SpringSiteForge</a>
+
+            <button class="navbar-toggler border-0" type="button"
+                    data-bs-toggle="offcanvas" data-bs-target="#mobileMenu"
+                    aria-controls="mobileMenu" aria-label="開啟選單">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 手機版側滑選單 -->
+    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="mobileMenu">
+        <div class="offcanvas-header border-bottom border-secondary">
+            <h6 class="offcanvas-title fw-bold">選單</h6>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="關閉"></button>
+        </div>
+        <div class="offcanvas-body px-0">
+            <ul class="navbar-nav">
+                <li class="nav-item border-bottom border-secondary">
+                    <a class="nav-link px-4 py-3" th:href="@{/}">首頁</a>
+                </li>
+                <li class="nav-item border-bottom border-secondary">
+                    <a class="nav-link px-4 py-3" th:href="@{/about}">關於我們</a>
+                </li>
+                <li class="nav-item border-bottom border-secondary">
+                    <a class="nav-link px-4 py-3" th:href="@{/services}">服務項目</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-4 py-3" th:href="@{/contact}">聯絡我們</a>
+                </li>
+            </ul>
+            <!-- 切換電腦版 -->
+            <div class="px-4 pt-4">
+                <a th:href="@{/switch-view?mode=desktop}" class="text-white-50 small text-decoration-none">
+                    切換至電腦版 →
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+</body>
+</html>

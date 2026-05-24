@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="body">
+    <!-- 桌面版主體：依 pageContents 區塊順序渲染 -->
+    <div th:if="${pageContents != null and !pageContents.isEmpty()}">
+        <div th:each="block : ${pageContents}">
+
+            <!-- hero 區塊 -->
+            <section th:if="${block.blockKey == 'hero'}" class="py-5 bg-light">
+                <div class="container">
+                    <div class="row align-items-center g-5">
+                        <div class="col-lg-6">
+                            <h1 class="display-5 fw-bold lh-1 mb-3"
+                                th:text="${block.contentMap?.title ?: page?.title}">標題</h1>
+                            <p class="col-lg-10 fs-4 text-muted"
+                               th:text="${block.contentMap?.subtitle}"></p>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-4">
+                                <a th:if="${block.contentMap?.ctaUrl}"
+                                   th:href="${block.contentMap.ctaUrl}"
+                                   class="btn btn-primary btn-lg px-4 me-md-2"
+                                   th:text="${block.contentMap?.ctaText ?: '了解更多'}">了解更多</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- content 文字區塊 -->
+            <section th:if="${block.blockKey == 'content'}" class="py-5">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <h2 th:if="${block.contentMap?.title}"
+                                class="mb-4" th:text="${block.contentMap.title}"></h2>
+                            <div th:if="${block.contentMap?.html}"
+                                 th:utext="${block.contentMap.html}"></div>
+                            <p th:if="${block.contentMap?.text}"
+                               class="lead text-muted" th:text="${block.contentMap.text}"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- features 特色列表 -->
+            <section th:if="${block.blockKey == 'features'}" class="py-5 bg-light">
+                <div class="container">
+                    <h2 th:if="${block.contentMap?.title}"
+                        class="text-center mb-5" th:text="${block.contentMap.title}"></h2>
+                    <div class="row g-4 row-cols-1 row-cols-md-3">
+                        <div class="col" th:each="item : ${block.contentMap?.items}">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body p-4">
+                                    <h5 class="card-title" th:text="${item.title}"></h5>
+                                    <p class="card-text text-muted" th:text="${item.desc}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- 無內容時的預設畫面 -->
+    <div th:if="${pageContents == null or pageContents.isEmpty()}"
+         class="container py-5 text-center text-muted">
+        <p>此頁面尚無內容。</p>
+    </div>
+</div>
+</body>
+</html>

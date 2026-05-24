@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="body">
+    <!-- 手機版主體：單欄排列，字體與間距針對觸控優化 -->
+    <div th:if="${pageContents != null and !pageContents.isEmpty()}">
+        <div th:each="block : ${pageContents}">
+
+            <!-- hero 區塊 -->
+            <section th:if="${block.blockKey == 'hero'}" class="py-4 bg-light text-center px-3">
+                <h1 class="fs-3 fw-bold mb-2"
+                    th:text="${block.contentMap?.title ?: page?.title}">標題</h1>
+                <p class="text-muted mb-3"
+                   th:text="${block.contentMap?.subtitle}"></p>
+                <a th:if="${block.contentMap?.ctaUrl}"
+                   th:href="${block.contentMap.ctaUrl}"
+                   class="btn btn-primary btn-lg w-100"
+                   th:text="${block.contentMap?.ctaText ?: '了解更多'}">了解更多</a>
+            </section>
+
+            <!-- content 文字區塊 -->
+            <section th:if="${block.blockKey == 'content'}" class="py-4 px-3">
+                <h2 th:if="${block.contentMap?.title}"
+                    class="fs-4 mb-3" th:text="${block.contentMap.title}"></h2>
+                <div th:if="${block.contentMap?.html}"
+                     th:utext="${block.contentMap.html}"></div>
+                <p th:if="${block.contentMap?.text}"
+                   class="text-muted" th:text="${block.contentMap.text}"></p>
+            </section>
+
+            <!-- features 特色列表（單欄） -->
+            <section th:if="${block.blockKey == 'features'}" class="py-4 bg-light px-3">
+                <h2 th:if="${block.contentMap?.title}"
+                    class="fs-4 text-center mb-4" th:text="${block.contentMap.title}"></h2>
+                <div class="d-flex flex-column gap-3">
+                    <div class="card border-0 shadow-sm" th:each="item : ${block.contentMap?.items}">
+                        <div class="card-body py-3">
+                            <h6 class="card-title mb-1" th:text="${item.title}"></h6>
+                            <p class="card-text text-muted small mb-0" th:text="${item.desc}"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- 無內容時的預設畫面 -->
+    <div th:if="${pageContents == null or pageContents.isEmpty()}"
+         class="py-5 text-center text-muted px-3">
+        <p>此頁面尚無內容。</p>
+    </div>
+</div>
+</body>
+</html>

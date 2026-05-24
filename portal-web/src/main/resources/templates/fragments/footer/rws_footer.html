@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="footer">
+    <div class="bg-dark text-white pt-4 pb-3 mt-auto">
+        <div class="container-fluid px-4">
+            <!-- 手機版精簡連結 -->
+            <div class="row g-3 mb-3">
+                <div class="col-6">
+                    <ul class="list-unstyled small mb-0">
+                        <li class="mb-2"><a class="text-white-50 text-decoration-none" th:href="@{/}">首頁</a></li>
+                        <li class="mb-2"><a class="text-white-50 text-decoration-none" th:href="@{/about}">關於我們</a></li>
+                    </ul>
+                </div>
+                <div class="col-6">
+                    <ul class="list-unstyled small mb-0">
+                        <li class="mb-2"><a class="text-white-50 text-decoration-none" th:href="@{/services}">服務項目</a></li>
+                        <li class="mb-2"><a class="text-white-50 text-decoration-none" th:href="@{/contact}">聯絡我們</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="border-secondary mb-3">
+            <p class="text-center text-white-50 small mb-2">
+                &copy; <span th:text="${#temporals.year(#temporals.createNow())}">2026</span> SpringSiteForge.
+            </p>
+            <!-- 切換電腦版 -->
+            <p class="text-center mb-0">
+                <a th:href="@{/switch-view?mode=desktop}" class="text-white-50 small text-decoration-none">
+                    切換至電腦版
+                </a>
+            </p>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

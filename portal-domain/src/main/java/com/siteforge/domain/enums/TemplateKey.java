@@ -1,10 +1,10 @@
 package com.siteforge.domain.enums;
 
 public enum TemplateKey {
-    HEADER_DEFAULT,
-    HEADER_MINIMAL,
-    FOOTER_DEFAULT,
-    FOOTER_MINIMAL,
-    BODY_STANDARD,
-    BODY_LANDING
+    RWD_HEADER,
+    RWS_HEADER,
+    RWD_FOOTER,
+    RWS_FOOTER,
+    RWD_BODY,
+    RWS_BODY
 }
