@@ -14,3 +14,8 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+
+cms:
+  init:
+    admin-username: manager
+    admin-password: siteforge2026

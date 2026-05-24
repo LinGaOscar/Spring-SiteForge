@@ -8,6 +8,16 @@
 
 ---
 
+## 0. 初始化（首次 clone 後執行一次）
+
+在專案根目錄執行，確保所有模組依賴正確安裝至本機 Maven repository：
+
+```bash
+mvn install -DskipTests
+```
+
+---
+
 ## 1. 啟動基礎設施
 
 ```bash
@@ -36,6 +46,15 @@ mvn spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
 ```
 
 首次啟動會自動執行 Flyway migration 建立所有資料表，並透過 `DataInitializer` 建立預設管理員帳號。
+
+預設管理員帳號設定於 `portal-cms/src/main/resources/application-dev.yml`：
+
+```yaml
+cms:
+  init:
+    admin-username: manager
+    admin-password: siteforge2026
+```
 
 ---
 

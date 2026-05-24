@@ -8,6 +8,7 @@ import com.siteforge.domain.repository.CmsUserRepository;
 import com.siteforge.domain.repository.SiteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +28,12 @@ public class DataInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final SiteRepository siteRepository;
 
+    @Value("${cms.init.admin-username}")
+    private String adminUsername;
+
+    @Value("${cms.init.admin-password}")
+    private String adminPassword;
+
     @Override
     @Transactional
     public void run(String... args) {
@@ -40,13 +47,13 @@ public class DataInitializer implements CommandLineRunner {
             roleRepository.save(editorRole);
 
             CmsUser manager = new CmsUser();
-            manager.setUsername("manager");
-            manager.setPassword(passwordEncoder.encode("siteforge2026"));
+            manager.setUsername(adminUsername);
+            manager.setPassword(passwordEncoder.encode(adminPassword));
             manager.setEnabled(true);
             manager.setRoles(Set.of(managerRole));
             userRepository.save(manager);
 
-            log.info("=== Dev seed: manager / siteforge2026 ===");
+            log.info("=== Dev seed: {} / [configured in application-dev.yml] ===", adminUsername);
         }
 
         if (siteRepository.count() == 0) {
