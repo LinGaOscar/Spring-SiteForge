@@ -42,8 +42,8 @@ public class LocalStorageService implements StorageService {
         String baseName = cleanedPath.contains("/")
             ? cleanedPath.substring(cleanedPath.lastIndexOf('/') + 1)
             : cleanedPath;
-        // baseName 不應含路徑分隔符（防禦性驗證）
-        if (baseName.contains("/") || baseName.contains("\\"))
+        // baseName 不應含路徑穿越字元或分隔符（防禦性驗證）
+        if (baseName.contains("..") || baseName.contains("/") || baseName.contains("\\"))
             throw new IllegalArgumentException("Invalid filename: " + baseName);
 
         String mimeType = file.getContentType();
