@@ -17,12 +17,19 @@ import java.util.UUID;
 @Service
 public class LocalStorageService implements StorageService {
 
+    // SVG 刻意排除：瀏覽器會渲染並執行內嵌 JS，構成 stored XSS 風險
     private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
-        "image/jpeg", "image/png", "image/gif", "image/webp"
+        "image/jpeg", "image/png", "image/gif", "image/webp",
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
 
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
-        "jpg", "jpeg", "png", "gif", "webp"
+        "jpg", "jpeg", "png", "gif", "webp",
+        "pdf", "doc", "docx", "xls", "xlsx"
     );
 
     @Value("${storage.upload-dir}")

@@ -62,6 +62,10 @@ public class PublishService {
         Page managedPage = restoreSnapshot(pageId, targetVersion.getSnapshotJson());
         managedPage.setStatus(PageStatus.PUBLISHED);
         managedPage.setUpdatedBy(username);
+        // 還原後清除工作流欄位，避免與 PUBLISHED 狀態不一致
+        managedPage.setSubmittedBy(null);
+        managedPage.setSubmittedAt(null);
+        managedPage.setReviewNote(null);
         pageRepository.save(managedPage);
 
         List<PageContent> restoredContents = pageContentRepository.findByPageIdOrderBySortOrder(pageId);
