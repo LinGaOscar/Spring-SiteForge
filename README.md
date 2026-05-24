@@ -83,79 +83,26 @@ Request /about
 
 ---
 
-## 本機開發環境
+## 開發環境
 
-### 前置需求
-
-- Java 21
-- Maven 3.9+
-- Docker（用於啟動 PostgreSQL + Redis）
-
-### 1. 啟動基礎設施
+詳細設定與啟動步驟請參閱 [docs/dev.md](docs/dev.md)。
 
 ```bash
-# 複製環境變數範本並填入密碼
-cp .env.example .env
-
-# 啟動 PostgreSQL + Redis
-docker compose up -d
+docker compose up -d                                              # 啟動 PostgreSQL + Redis
+mvn spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev  # 後台
+mvn spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev  # 前台
 ```
-
-預設連線資訊（`.env.example` 預設值）：
-
-| 項目 | 值 |
-|------|-----|
-| PostgreSQL host | `localhost:5432` |
-| Database | `siteforge_db` |
-| Username | `siteforge` |
-| Redis host | `localhost:6379` |
-
-### 2. 啟動 portal-cms（後台 + Flyway migration）
-
-```bash
-mvn spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
-```
-
-首次啟動會自動執行 Flyway migration 建立所有資料表，並透過 `DataInitializer` 建立預設管理員帳號。
-
-### 3. 啟動 portal-web（前台）
-
-```bash
-mvn spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
-```
-
-兩個應用可獨立啟動，`portal-web` 不依賴 `portal-cms` 服務。
-
-### 存取位址
-
-| 應用 | URL |
-|------|-----|
-| 前台 | http://localhost:8100 |
-| 後台 CMS | http://localhost:8200 |
-| PostgreSQL | localhost:5432 |
-| Redis | localhost:6379 |
-
-> **Dev 環境注意**：頁面模板中的圖片 URL 前綴需加 `http://localhost:8200`（已設定於 `cms.asset-base-url`），因為上傳圖片統一由 portal-cms 的 `/uploads/**` 提供。
 
 ---
 
 ## 正式部署
 
-完整部署步驟請參閱 [docs/deployment.md](docs/deployment.md)。
-
-部署方式：開發機 build → 打包成 `.tar.gz` → 傳輸到伺服器 → `docker load` → 啟動。
-
----
-
-## 執行測試
+詳細打包與上版步驟請參閱 [docs/prod.md](docs/prod.md)。
 
 ```bash
-# 全模組
-mvn test
-
-# 單一模組
-mvn test -pl portal-cms
-mvn test -pl portal-domain
+docker compose -f docker-compose.prod.yml build  # 建置 Image
+docker save ... | gzip > portal-cms.tar.gz       # 打包
+# 傳輸到伺服器後 docker load → docker compose up -d
 ```
 
 ---
