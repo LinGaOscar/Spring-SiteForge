@@ -18,6 +18,7 @@ public class WorkflowService {
 
     private final PageRepository pageRepository;
     private final CmsUserService userService;
+    private final PublishService publishService;
 
     /** OP 送審：DRAFT → PENDING_REVIEW */
     public void submitForReview(Long pageId, CmsUser actor) {
@@ -79,6 +80,8 @@ public class WorkflowService {
 
         page.setStatus(PageStatus.PUBLISHED);
         page.setUpdatedBy(actor.getUsername());
+        // 發布完成後建立 page_version 快照（於同一交易內）
+        publishService.snapshotPublished(pageId, actor.getUsername());
     }
 
     /** MA 退回發布申請：PENDING_PUBLISH → APPROVED */

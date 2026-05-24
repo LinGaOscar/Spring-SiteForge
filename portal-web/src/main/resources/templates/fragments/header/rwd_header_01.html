@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="header">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-5" th:href="@{/}">SpringSiteForge</a>
+
+            <button class="navbar-toggler border-0" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#navMain"
+                    aria-controls="navMain" aria-expanded="false" aria-label="開啟選單">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navMain">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-lg-1">
+                    <li class="nav-item">
+                        <a class="nav-link px-3"
+                           th:classappend="${page?.path == '/'} ? 'active fw-semibold' : ''"
+                           th:href="@{/}">首頁</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3"
+                           th:classappend="${page?.path == '/about'} ? 'active fw-semibold' : ''"
+                           th:href="@{/about}">關於我們</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3"
+                           th:classappend="${page?.path == '/services'} ? 'active fw-semibold' : ''"
+                           th:href="@{/services}">服務項目</a>
+                    </li>
+                    <li class="nav-item ms-lg-3">
+                        <a class="btn btn-primary btn-sm px-3" th:href="@{/contact}">聯絡我們</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+</body>
+</html>

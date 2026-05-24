@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="body">
+
+    <!-- Page Hero -->
+    <section class="py-5 bg-dark text-white text-center"
+             style="padding-top:4rem;padding-bottom:4rem;
+             background:linear-gradient(135deg,#1a1a2e 0%,#0f3460 100%);">
+        <div class="container">
+            <h1 class="fw-bold display-5 mb-3">關於我們</h1>
+            <p class="text-secondary lead mb-0">深耕企業數位轉型，成就客戶品牌未來</p>
+        </div>
+    </section>
+
+    <!-- 公司簡介 -->
+    <section class="py-6" style="padding-top:5rem;padding-bottom:5rem;">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-12 col-md-6">
+                    <span class="badge bg-primary mb-3">我們的故事</span>
+                    <h2 class="fw-bold mb-4">十年磨一劍，<br>打造數位生態系</h2>
+                    <p class="text-muted lh-lg mb-3">
+                        SpringSiteForge 成立於 2015 年，由一群對技術充滿熱情的工程師所創立。
+                        我們深信企業官網不僅是門面，更是品牌溝通最重要的媒介。
+                    </p>
+                    <p class="text-muted lh-lg">
+                        經過十年的持續深耕，我們服務超過 500 家企業客戶，
+                        從新創公司到上市集團，每一個專案都是我們對卓越品質的承諾。
+                    </p>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="bg-light rounded-4 p-5 text-center">
+                        <div class="fs-1 mb-3">🏢</div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-6">
+                                <div class="fw-bold fs-4 text-primary">2015</div>
+                                <div class="small text-muted">創立年份</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="fw-bold fs-4 text-primary">50+</div>
+                                <div class="small text-muted">專業團隊</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="fw-bold fs-4 text-primary">500+</div>
+                                <div class="small text-muted">服務客戶</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="fw-bold fs-4 text-primary">3</div>
+                                <div class="small text-muted">辦公據點</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 使命與願景 -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">使命與願景</h2>
+            </div>
+            <div class="row g-4">
+                <div class="col-12 col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width:48px;height:48px;flex-shrink:0">🎯</div>
+                                <h5 class="fw-bold mb-0">我們的使命</h5>
+                            </div>
+                            <p class="text-muted lh-lg mb-0">
+                                以技術為引擎，以設計為語言，協助每一家企業在數位世界建立獨特且有影響力的品牌形象。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width:48px;height:48px;flex-shrink:0">🌟</div>
+                                <h5 class="fw-bold mb-0">我們的願景</h5>
+                            </div>
+                            <p class="text-muted lh-lg mb-0">
+                                成為亞太地區最受信賴的企業官網解決方案夥伴，推動台灣企業數位轉型走向世界舞台。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-5 text-center border-top">
+        <div class="container">
+            <h4 class="fw-bold mb-3">想更了解我們？</h4>
+            <p class="text-muted mb-4">歡迎與我們的顧問團隊約個 30 分鐘的線上介紹</p>
+            <a th:href="@{/contact}" class="btn btn-primary btn-lg px-5">預約諮詢</a>
+        </div>
+    </section>
+
+</div>
+</body>
+</html>

@@ -78,6 +78,23 @@ public class PublishService {
         return toVersionResponse(pageVersionRepository.save(rollbackVersion));
     }
 
+    /** 由 WorkflowService 在 approvePublish 後呼叫，只建立 version 快照，不重複修改 page status */
+    public void snapshotPublished(Long pageId, String publishedBy) {
+        Page page = pageRepository.findById(pageId)
+            .orElseThrow(() -> new IllegalArgumentException("Page not found: " + pageId));
+        List<PageContent> contents = pageContentRepository.findByPageIdOrderBySortOrder(pageId);
+        int nextVersionNo = pageVersionRepository.findMaxVersionNoByPageId(pageId).orElse(0) + 1;
+
+        PageVersion version = new PageVersion();
+        version.setPage(page);
+        version.setVersionNo(nextVersionNo);
+        version.setSnapshotJson(buildSnapshot(page, contents));
+        version.setStatus(PageStatus.PUBLISHED);
+        version.setPublishedAt(LocalDateTime.now());
+        version.setPublishedBy(publishedBy);
+        pageVersionRepository.save(version);
+    }
+
     @Transactional(readOnly = true)
     public List<PageVersionResponse> listVersions(Long pageId) {
         return pageVersionRepository.findByPageIdOrderByVersionNoDesc(pageId)

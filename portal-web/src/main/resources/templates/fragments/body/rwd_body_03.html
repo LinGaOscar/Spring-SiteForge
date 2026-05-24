@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="body">
+
+    <!-- Page Hero -->
+    <section class="py-5 bg-dark text-white text-center"
+             style="padding-top:4rem;padding-bottom:4rem;
+             background:linear-gradient(135deg,#1a1a2e 0%,#0f3460 100%);">
+        <div class="container">
+            <h1 class="fw-bold display-5 mb-3">服務項目</h1>
+            <p class="text-secondary lead mb-0">全方位企業數位化解決方案，滿足您的每一個需求</p>
+        </div>
+    </section>
+
+    <!-- 主要服務 -->
+    <section class="py-6" style="padding-top:5rem;padding-bottom:5rem;">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">我們提供的服務</h2>
+                <p class="text-muted">從規劃到上線，提供端對端完整服務</p>
+            </div>
+            <div class="row g-4">
+                <!-- 服務 1 -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="fs-2 mb-3">🌐</div>
+                            <h5 class="fw-bold mb-3">企業官網建置</h5>
+                            <p class="text-muted small lh-lg mb-4">
+                                從品牌視覺設計到前後端開發，打造符合企業需求的響應式官網，
+                                支援多語系與 SEO 最佳化。
+                            </p>
+                            <ul class="list-unstyled small text-muted">
+                                <li class="mb-1">✓ 響應式設計（RWD）</li>
+                                <li class="mb-1">✓ SEO 搜尋引擎優化</li>
+                                <li class="mb-1">✓ 多語系支援</li>
+                                <li>✓ Google Analytics 整合</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- 服務 2 -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="fs-2 mb-3">⚙️</div>
+                            <h5 class="fw-bold mb-3">內容管理系統</h5>
+                            <p class="text-muted small lh-lg mb-4">
+                                彈性的 CMS 後台讓您的行銷團隊能夠自主更新網站內容，
+                                無須仰賴工程師介入。
+                            </p>
+                            <ul class="list-unstyled small text-muted">
+                                <li class="mb-1">✓ 所見即所得編輯器</li>
+                                <li class="mb-1">✓ 多層級審核流程</li>
+                                <li class="mb-1">✓ 版本歷史管理</li>
+                                <li>✓ 素材集中管理</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- 服務 3 -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="fs-2 mb-3">📊</div>
+                            <h5 class="fw-bold mb-3">數位行銷整合</h5>
+                            <p class="text-muted small lh-lg mb-4">
+                                結合官網與數位行銷工具，協助您追蹤效果、
+                                優化轉換率，提升品牌在線能見度。
+                            </p>
+                            <ul class="list-unstyled small text-muted">
+                                <li class="mb-1">✓ 數據分析報表</li>
+                                <li class="mb-1">✓ 廣告追蹤像素設定</li>
+                                <li class="mb-1">✓ A/B 測試支援</li>
+                                <li>✓ 轉換漏斗分析</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- 服務 4 -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="fs-2 mb-3">🔒</div>
+                            <h5 class="fw-bold mb-3">資安與合規</h5>
+                            <p class="text-muted small lh-lg mb-4">
+                                符合個資法與 ISO 27001 規範，提供完整資安評估、
+                                滲透測試與修補建議服務。
+                            </p>
+                            <ul class="list-unstyled small text-muted">
+                                <li class="mb-1">✓ SSL / HTTPS 強制加密</li>
+                                <li class="mb-1">✓ OWASP Top 10 防護</li>
+                                <li class="mb-1">✓ 個資保護合規稽核</li>
+                                <li>✓ 定期弱點掃描</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- 服務 5 -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="fs-2 mb-3">☁️</div>
+                            <h5 class="fw-bold mb-3">雲端主機管理</h5>
+                            <p class="text-muted small lh-lg mb-4">
+                                代管雲端主機環境，提供 99.9% SLA 保障，
+                                含自動備份、CDN 加速與監控告警。
+                            </p>
+                            <ul class="list-unstyled small text-muted">
+                                <li class="mb-1">✓ 99.9% 可用性 SLA</li>
+                                <li class="mb-1">✓ 每日自動備份</li>
+                                <li class="mb-1">✓ 全球 CDN 加速</li>
+                                <li>✓ 24/7 監控告警</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- 服務 6 -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="fs-2 mb-3">🎓</div>
+                            <h5 class="fw-bold mb-3">教育訓練</h5>
+                            <p class="text-muted small lh-lg mb-4">
+                                為您的內部團隊提供客製化操作培訓，
+                                確保每位成員都能流暢使用 CMS 系統。
+                            </p>
+                            <ul class="list-unstyled small text-muted">
+                                <li class="mb-1">✓ 一對一操作教學</li>
+                                <li class="mb-1">✓ 教學影片錄製</li>
+                                <li class="mb-1">✓ 操作手冊製作</li>
+                                <li>✓ 年度複訓方案</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 服務流程 -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">服務流程</h2>
+                <p class="text-muted">透明、高效的專案推進方式</p>
+            </div>
+            <div class="row g-3 text-center">
+                <div class="col-6 col-md-3">
+                    <div class="bg-white rounded-4 p-4 shadow-sm h-100">
+                        <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center fw-bold fs-5"
+                             style="width:52px;height:52px">1</div>
+                        <h6 class="fw-bold">需求訪談</h6>
+                        <p class="text-muted small mb-0">深入了解企業目標與需求</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="bg-white rounded-4 p-4 shadow-sm h-100">
+                        <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center fw-bold fs-5"
+                             style="width:52px;height:52px">2</div>
+                        <h6 class="fw-bold">規劃提案</h6>
+                        <p class="text-muted small mb-0">提供架構設計與報價方案</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="bg-white rounded-4 p-4 shadow-sm h-100">
+                        <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center fw-bold fs-5"
+                             style="width:52px;height:52px">3</div>
+                        <h6 class="fw-bold">開發建置</h6>
+                        <p class="text-muted small mb-0">敏捷開發，定期成果展示</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="bg-white rounded-4 p-4 shadow-sm h-100">
+                        <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center fw-bold fs-5"
+                             style="width:52px;height:52px">4</div>
+                        <h6 class="fw-bold">上線維運</h6>
+                        <p class="text-muted small mb-0">平穩上線並持續技術支援</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-5 bg-primary text-white text-center">
+        <div class="container">
+            <h3 class="fw-bold mb-3">找到適合您的服務方案</h3>
+            <p class="mb-4 opacity-75">與我們的專業顧問討論最適合您的解決方案</p>
+            <a th:href="@{/contact}" class="btn btn-light btn-lg px-5 fw-semibold text-primary">
+                預約諮詢
+            </a>
+        </div>
+    </section>
+
+</div>
+</body>
+</html>

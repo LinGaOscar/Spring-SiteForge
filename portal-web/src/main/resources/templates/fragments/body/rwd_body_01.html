@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="body">
+
+    <!-- Hero -->
+    <section class="py-6 bg-dark text-white" style="padding-top:6rem;padding-bottom:6rem;
+        background: linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);">
+        <div class="container text-center">
+            <span class="badge bg-primary text-uppercase mb-3 px-3 py-2">企業形象網站</span>
+            <h1 class="display-4 fw-bold mb-4">
+                打造卓越的<br class="d-none d-md-block">
+                <span class="text-primary">數位品牌形象</span>
+            </h1>
+            <p class="lead text-secondary mb-5 mx-auto" style="max-width:600px">
+                專業 CMS 平台，讓您輕鬆管理企業官網內容，
+                以最高效率呈現品牌價值。
+            </p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a th:href="@{/services}" class="btn btn-primary btn-lg px-5">了解服務</a>
+                <a th:href="@{/contact}" class="btn btn-outline-light btn-lg px-5">立即諮詢</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 數字成就 -->
+    <section class="py-5 bg-white border-bottom">
+        <div class="container">
+            <div class="row text-center g-4">
+                <div class="col-6 col-md-3">
+                    <div class="fs-1 fw-bold text-primary">500+</div>
+                    <div class="small text-muted mt-1">服務企業客戶</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="fs-1 fw-bold text-primary">99.9%</div>
+                    <div class="small text-muted mt-1">系統穩定度</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="fs-1 fw-bold text-primary">10年+</div>
+                    <div class="small text-muted mt-1">產業深耕經驗</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="fs-1 fw-bold text-primary">24/7</div>
+                    <div class="small text-muted mt-1">全年技術支援</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心特色 -->
+    <section class="py-6 bg-light" style="padding-top:5rem;padding-bottom:5rem;">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">為什麼選擇我們</h2>
+                <p class="text-muted">結合最新技術與豐富經驗，為您提供最佳解決方案</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-12 col-md-4">
+                    <div class="card border-0 shadow-sm h-100 p-2">
+                        <div class="card-body text-center">
+                            <div class="fs-1 mb-3">🚀</div>
+                            <h5 class="fw-bold">快速部署</h5>
+                            <p class="text-muted small">
+                                標準化流程配合自動化工具，從需求確認到上線發布，
+                                最快 7 個工作天完成。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="card border-0 shadow-sm h-100 p-2">
+                        <div class="card-body text-center">
+                            <div class="fs-1 mb-3">🛡️</div>
+                            <h5 class="fw-bold">安全可靠</h5>
+                            <p class="text-muted small">
+                                多層次安全防護架構，定期安全稽核，
+                                符合企業資安合規要求。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="card border-0 shadow-sm h-100 p-2">
+                        <div class="card-body text-center">
+                            <div class="fs-1 mb-3">📱</div>
+                            <h5 class="fw-bold">響應式設計</h5>
+                            <p class="text-muted small">
+                                全裝置最佳化顯示，桌機、平板、手機
+                                均呈現最佳使用體驗。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-5 bg-primary text-white text-center">
+        <div class="container">
+            <h3 class="fw-bold mb-3">準備好升級您的企業官網了嗎？</h3>
+            <p class="mb-4 opacity-75">立即與我們的專業顧問聯繫，獲得免費諮詢報告</p>
+            <a th:href="@{/contact}" class="btn btn-light btn-lg px-5 fw-semibold text-primary">
+                免費諮詢
+            </a>
+        </div>
+    </section>
+
+</div>
+</body>
+</html>
