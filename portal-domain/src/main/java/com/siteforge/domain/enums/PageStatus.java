@@ -10,5 +10,7 @@ public enum PageStatus {
     /** OP 申請發布，等待 MA 放行 */
     PENDING_PUBLISH,
     /** 已發布，對前台可見 */
-    PUBLISHED
+    PUBLISHED,
+    /** OP 申請下架，等待 MA 確認 */
+    PENDING_UNPUBLISH
 }

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/base :: layout('素材管理', ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+<main>
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h5 class="fw-bold mb-0">素材管理</h5>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
+            + 上傳素材
+        </button>
+    </div>
+
+    <!-- 說明 -->
+    <p class="text-muted small mb-3">
+        所有單位的素材均可預覽與使用。僅同單位的 OP / MA 可更新或刪除。
+    </p>
+
+    <!-- 素材 Grid -->
+    <div class="row g-3">
+        <div class="col-6 col-md-3 col-lg-2" th:each="asset : ${assets}">
+            <div class="card border-0 shadow-sm h-100">
+                <!-- 圖片預覽 -->
+                <div class="bg-light d-flex align-items-center justify-content-center"
+                     style="height:120px;overflow:hidden">
+                    <img th:if="${asset.mimeType != null and asset.mimeType.startsWith('image/')}"
+                         th:src="${assetBaseUrl + '/uploads/' + asset.filePath}"
+                         class="img-fluid" style="max-height:120px;object-fit:cover;width:100%"
+                         th:alt="${asset.filename}">
+                    <div th:unless="${asset.mimeType != null and asset.mimeType.startsWith('image/')}"
+                         class="text-muted text-center p-2">
+                        <div class="fs-2">📄</div>
+                        <div class="small" th:text="${asset.mimeType ?: '未知類型'}"></div>
+                    </div>
+                </div>
+                <div class="card-body p-2">
+                    <p class="small text-truncate mb-1 fw-semibold"
+                       th:text="${asset.filename}" th:title="${asset.filename}">檔名</p>
+                    <p class="small text-muted mb-2"
+                       th:text="${asset.unit?.code ?: '—'} + ' · ' + ${asset.uploadedBy ?: '—'}"></p>
+                    <div class="d-flex gap-1">
+                        <!-- 預覽（全單位可用） -->
+                        <a th:href="${assetBaseUrl + '/uploads/' + asset.filePath}"
+                           target="_blank" class="btn btn-xs btn-sm btn-outline-secondary py-0 flex-grow-1">
+                            預覽
+                        </a>
+                        <!-- 刪除（同單位 OP/MA） -->
+                        <form th:if="${(isOP or isMA) and unitCode == asset.unit?.code}"
+                              th:action="@{/cms/assets/{id}/delete(id=${asset.id})}"
+                              method="post"
+                              onsubmit="return confirm('確定刪除此素材？')">
+                            <button class="btn btn-sm btn-outline-danger py-0">✕</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${assets.isEmpty()}" class="col-12">
+            <div class="text-center text-muted py-5">尚無素材，請上傳。</div>
+        </div>
+    </div>
+
+    <!-- 上傳 Modal -->
+    <div class="modal fade" id="uploadModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">上傳素材</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/cms/assets/upload}" method="post"
+                          enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">選擇檔案</label>
+                            <input type="file" name="file" class="form-control" required
+                                   accept="image/*,.pdf,.doc,.docx,.xls,.xlsx">
+                            <div class="form-text">支援圖片、PDF、Office 文件</div>
+                        </div>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    data-bs-dismiss="modal">取消</button>
+                            <button type="submit" class="btn btn-sm btn-primary">上傳</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

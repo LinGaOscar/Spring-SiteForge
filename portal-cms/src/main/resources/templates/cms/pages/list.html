@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/base :: layout('頁面管理', ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+<main>
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h5 class="fw-bold mb-0">頁面管理</h5>
+        <a th:if="${isOP}" th:href="@{/cms/pages/new}"
+           class="btn btn-primary btn-sm">+ 新增頁面</a>
+    </div>
+
+    <!-- 狀態篩選 Tab -->
+    <div class="mb-3">
+        <a th:href="@{/cms/pages}" class="btn btn-sm me-1"
+           th:classappend="${selectedStatus == null} ? 'btn-dark' : 'btn-outline-secondary'">全部</a>
+        <a th:each="s : ${statuses}"
+           th:href="@{/cms/pages(status=${s.name()})}"
+           class="btn btn-sm me-1"
+           th:classappend="${selectedStatus == s.name()} ? 'btn-dark' : 'btn-outline-secondary'"
+           th:text="${s.name()}">STATUS</a>
+    </div>
+
+    <!-- 頁面列表 -->
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>路徑</th>
+                    <th>標題</th>
+                    <th>Layout</th>
+                    <th>狀態</th>
+                    <th>送審人</th>
+                    <th>最後更新</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${pages}">
+                    <td class="text-muted small" th:text="${p.path}"></td>
+                    <td th:text="${p.title}"></td>
+                    <td class="small text-muted"
+                        th:text="${p.layoutSet?.name ?: '—'}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${p.status.name() == 'PUBLISHED'} ? 'bg-success'
+                                           : (${p.status.name().startsWith('PENDING')} ? 'bg-warning text-dark'
+                                           : (${p.status.name() == 'APPROVED'} ? 'bg-info text-dark' : 'bg-secondary'))"
+                              th:text="${p.status.name()}">狀態</span>
+                    </td>
+                    <td class="small text-muted" th:text="${p.submittedBy ?: '—'}"></td>
+                    <td class="small text-muted"
+                        th:text="${p.updatedAt != null ? #temporals.format(p.updatedAt,'MM/dd HH:mm') : '—'}"></td>
+                    <td>
+                        <div class="d-flex gap-1 flex-wrap">
+                            <!-- OP 編輯 -->
+                            <a th:if="${isOP and (p.status.name() == 'DRAFT' or p.status.name() == 'APPROVED')}"
+                               th:href="@{/cms/pages/{id}/edit(id=${p.id})}"
+                               class="btn btn-xs btn-outline-primary btn-sm py-0">編輯</a>
+
+                            <!-- OP 送審 -->
+                            <form th:if="${isOP and p.status.name() == 'DRAFT'}"
+                                  th:action="@{/cms/pages/{id}/submit(id=${p.id})}" method="post">
+                                <button class="btn btn-sm btn-outline-secondary py-0">送審</button>
+                            </form>
+
+                            <!-- OP 申請發布 -->
+                            <form th:if="${isOP and p.status.name() == 'APPROVED'}"
+                                  th:action="@{/cms/pages/{id}/request-publish(id=${p.id})}" method="post">
+                                <button class="btn btn-sm btn-outline-success py-0">申請發布</button>
+                            </form>
+
+                            <!-- OP 申請下架 -->
+                            <form th:if="${isOP and p.status.name() == 'PUBLISHED'}"
+                                  th:action="@{/cms/pages/{id}/request-unpublish(id=${p.id})}" method="post">
+                                <button class="btn btn-sm btn-outline-warning py-0">申請下架</button>
+                            </form>
+
+                            <!-- OP 刪除草稿 -->
+                            <form th:if="${isOP and p.status.name() == 'DRAFT'}"
+                                  th:action="@{/cms/pages/{id}/delete(id=${p.id})}" method="post"
+                                  onsubmit="return confirm('確定刪除此頁面？')">
+                                <button class="btn btn-sm btn-outline-danger py-0">刪除</button>
+                            </form>
+
+                            <!-- MA 放行建立 -->
+                            <button th:if="${isMA and p.status.name() == 'PENDING_REVIEW' and !#authentication.name.equals(p.submittedBy)}"
+                                    class="btn btn-sm btn-success py-0"
+                                    data-bs-toggle="modal"
+                                    th:data-bs-target="'#reviewModal-' + ${p.id}">放行</button>
+
+                            <!-- MA 放行發布 -->
+                            <form th:if="${isMA and p.status.name() == 'PENDING_PUBLISH' and !#authentication.name.equals(p.submittedBy)}"
+                                  th:action="@{/cms/pages/{id}/approve-publish(id=${p.id})}" method="post">
+                                <button class="btn btn-sm btn-success py-0">放行發布</button>
+                            </form>
+
+                            <!-- MA 退回發布 -->
+                            <button th:if="${isMA and p.status.name() == 'PENDING_PUBLISH' and !#authentication.name.equals(p.submittedBy)}"
+                                    class="btn btn-sm btn-outline-danger py-0"
+                                    data-bs-toggle="modal"
+                                    th:data-bs-target="'#rejectPublishModal-' + ${p.id}">退回</button>
+
+                            <!-- MA 直接下架 -->
+                            <form th:if="${isMA and p.status.name() == 'PUBLISHED'}"
+                                  th:action="@{/cms/pages/{id}/unpublish(id=${p.id})}" method="post"
+                                  onsubmit="return confirm('確定直接下架？')">
+                                <button class="btn btn-sm btn-outline-warning py-0">下架</button>
+                            </form>
+
+                            <!-- MA 確認下架 -->
+                            <form th:if="${isMA and p.status.name() == 'PENDING_UNPUBLISH'}"
+                                  th:action="@{/cms/pages/{id}/confirm-unpublish(id=${p.id})}" method="post">
+                                <button class="btn btn-sm btn-warning py-0">確認下架</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${pages.isEmpty()}">
+                    <td colspan="7" class="text-center text-muted py-4">此狀態下無頁面</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MA 放行建立 Modal（每個 PENDING_REVIEW 頁面一個） -->
+    <div th:each="p : ${pages}" th:if="${p.status.name() == 'PENDING_REVIEW'}">
+        <div class="modal fade" th:id="'reviewModal-' + ${p.id}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title">放行審核 — <span th:text="${p.title}"></span></h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="small text-muted mb-3">
+                            送審人：<span th:text="${p.submittedBy}"></span>
+                            · <span th:text="${p.submittedAt != null ? #temporals.format(p.submittedAt,'MM/dd HH:mm') : '—'}"></span>
+                        </p>
+                        <div th:if="${p.reviewNote}" class="alert alert-secondary py-2 small mb-3">
+                            上次退回原因：<span th:text="${p.reviewNote}"></span>
+                        </div>
+                        <form th:action="@{/cms/pages/{id}/approve(id=${p.id})}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label small">備註（選填）</label>
+                                <textarea name="note" class="form-control form-control-sm" rows="2"></textarea>
+                            </div>
+                            <div class="d-flex gap-2 justify-content-end">
+                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                        data-bs-dismiss="modal">取消</button>
+                                <button type="submit" class="btn btn-sm btn-success">放行</button>
+                            </div>
+                        </form>
+                        <hr>
+                        <form th:action="@{/cms/pages/{id}/reject(id=${p.id})}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label small">退回原因（選填）</label>
+                                <textarea name="note" class="form-control form-control-sm" rows="2"></textarea>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">退回</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MA 退回發布 Modal -->
+    <div th:each="p : ${pages}" th:if="${p.status.name() == 'PENDING_PUBLISH'}">
+        <div class="modal fade" th:id="'rejectPublishModal-' + ${p.id}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title">退回發布申請 — <span th:text="${p.title}"></span></h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form th:action="@{/cms/pages/{id}/reject-publish(id=${p.id})}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label small">退回原因（選填）</label>
+                                <textarea name="note" class="form-control form-control-sm" rows="3"></textarea>
+                            </div>
+                            <div class="d-flex gap-2 justify-content-end">
+                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                        data-bs-dismiss="modal">取消</button>
+                                <button type="submit" class="btn btn-sm btn-danger">確認退回</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>
