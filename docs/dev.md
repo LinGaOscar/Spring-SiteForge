@@ -13,8 +13,14 @@
 在專案根目錄執行，確保所有模組依賴正確安裝至本機 Maven repository：
 
 ```bash
-mvn install -DskipTests
+# macOS / Linux
+./mvnw install -DskipTests
+
+# Windows（Command Prompt 或 PowerShell）
+mvnw.cmd install -DskipTests
 ```
+
+> 專案內建 Maven Wrapper（`mvnw` / `mvnw.cmd`），不需要另外安裝 Maven。
 
 ---
 
@@ -42,7 +48,11 @@ docker compose up -d
 ## 2. 啟動 portal-cms（後台 + Flyway migration）
 
 ```bash
-mvn spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
+# macOS / Linux
+./mvnw spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
+
+# Windows
+mvnw.cmd spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
 ```
 
 首次啟動會自動執行 Flyway migration 建立所有資料表，並透過 `DataInitializer` 建立預設管理員帳號。
@@ -61,7 +71,11 @@ cms:
 ## 3. 啟動 portal-web（前台）
 
 ```bash
-mvn spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
+# macOS / Linux
+./mvnw spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
+
+# Windows
+mvnw.cmd spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
 ```
 
 兩個應用可獨立啟動，`portal-web` 不依賴 `portal-cms` 服務。
@@ -84,10 +98,11 @@ mvn spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
 ## 執行測試
 
 ```bash
-# 全模組
-mvn test
+# macOS / Linux
+./mvnw test
+./mvnw test -pl portal-cms
 
-# 單一模組
-mvn test -pl portal-cms
-mvn test -pl portal-domain
+# Windows
+mvnw.cmd test
+mvnw.cmd test -pl portal-cms
 ```
