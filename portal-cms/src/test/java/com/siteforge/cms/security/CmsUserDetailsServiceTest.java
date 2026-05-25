@@ -1,7 +1,7 @@
 package com.siteforge.cms.security;
 
-import com.siteforge.domain.entity.CmsRole;
 import com.siteforge.domain.entity.CmsUser;
+import com.siteforge.domain.enums.CmsUserRole;
 import com.siteforge.domain.repository.CmsUserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,14 +29,11 @@ class CmsUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_found_returnsUserDetails() {
-        CmsRole role = new CmsRole();
-        role.setName("ROLE_MANAGER");
-
         CmsUser user = new CmsUser();
         user.setUsername("manager");
         user.setPassword("$2a$10$hashed");
         user.setEnabled(true);
-        user.setRoles(Set.of(role));
+        user.setRoles(Set.of(CmsUserRole.MA));
 
         when(userRepository.findByUsername("manager")).thenReturn(Optional.of(user));
 
@@ -45,7 +42,7 @@ class CmsUserDetailsServiceTest {
         assertThat(details.getUsername()).isEqualTo("manager");
         assertThat(details.getAuthorities())
             .extracting("authority")
-            .containsExactlyInAnyOrder("ROLE_MANAGER");
+            .containsExactlyInAnyOrder("ROLE_MA");
     }
 
     @Test

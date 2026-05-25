@@ -43,9 +43,8 @@ class PageServiceTest {
 
         layoutSet = new LayoutSet();
         layoutSet.setId(1L); layoutSet.setName("Default");
-        layoutSet.setHeaderKey(TemplateKey.HEADER_DEFAULT);
-        layoutSet.setBodyKey(TemplateKey.BODY_STANDARD);
-        layoutSet.setFooterKey(TemplateKey.FOOTER_DEFAULT);
+        layoutSet.setHeaderKey(TemplateKey.RWD_HEADER_01);
+        layoutSet.setFooterKey(TemplateKey.RWD_FOOTER_01);
     }
 
     @Test

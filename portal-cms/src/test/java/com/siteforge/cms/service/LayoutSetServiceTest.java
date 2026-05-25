@@ -29,16 +29,14 @@ class LayoutSetServiceTest {
     void create_validRequest_returnsSavedResponse() {
         LayoutSetRequest request = new LayoutSetRequest();
         request.setName("Default Layout");
-        request.setHeaderKey(TemplateKey.HEADER_DEFAULT);
-        request.setBodyKey(TemplateKey.BODY_STANDARD);
-        request.setFooterKey(TemplateKey.FOOTER_DEFAULT);
+        request.setHeaderKey(TemplateKey.RWD_HEADER_01);
+        request.setFooterKey(TemplateKey.RWD_FOOTER_01);
 
         LayoutSet saved = new LayoutSet();
         saved.setId(1L);
         saved.setName("Default Layout");
-        saved.setHeaderKey(TemplateKey.HEADER_DEFAULT);
-        saved.setBodyKey(TemplateKey.BODY_STANDARD);
-        saved.setFooterKey(TemplateKey.FOOTER_DEFAULT);
+        saved.setHeaderKey(TemplateKey.RWD_HEADER_01);
+        saved.setFooterKey(TemplateKey.RWD_FOOTER_01);
         saved.setEnabled(true);
         saved.setCreatedAt(LocalDateTime.now());
         saved.setUpdatedAt(LocalDateTime.now());
@@ -53,13 +51,12 @@ class LayoutSetServiceTest {
     void create_wrongHeaderKey_throwsIllegalArgument() {
         LayoutSetRequest request = new LayoutSetRequest();
         request.setName("Bad Layout");
-        request.setHeaderKey(TemplateKey.BODY_STANDARD); // Wrong: BODY key used for header slot
-        request.setBodyKey(TemplateKey.BODY_STANDARD);
-        request.setFooterKey(TemplateKey.FOOTER_DEFAULT);
+        request.setHeaderKey(TemplateKey.RWD_BODY_01); // 故意傳 BODY key 到 header 欄位
+        request.setFooterKey(TemplateKey.RWD_FOOTER_01);
 
         assertThatThrownBy(() -> layoutSetService.create(request, "manager"))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("headerKey must be a HEADER_");
+            .hasMessageContaining("headerKey must be a HEADER");
     }
 
     @Test
@@ -67,9 +64,8 @@ class LayoutSetServiceTest {
         when(layoutSetRepository.findById(99L)).thenReturn(Optional.empty());
         LayoutSetRequest request = new LayoutSetRequest();
         request.setName("X");
-        request.setHeaderKey(TemplateKey.HEADER_DEFAULT);
-        request.setBodyKey(TemplateKey.BODY_STANDARD);
-        request.setFooterKey(TemplateKey.FOOTER_DEFAULT);
+        request.setHeaderKey(TemplateKey.RWD_HEADER_01);
+        request.setFooterKey(TemplateKey.RWD_FOOTER_01);
 
         assertThatThrownBy(() -> layoutSetService.update(99L, request, "manager"))
             .isInstanceOf(IllegalArgumentException.class)

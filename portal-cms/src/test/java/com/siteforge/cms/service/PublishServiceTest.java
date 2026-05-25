@@ -48,8 +48,8 @@ class PublishServiceTest {
         site.setId(1L); site.setCode("default"); site.setName("Test");
 
         LayoutSet ls = new LayoutSet();
-        ls.setId(1L); ls.setHeaderKey(TemplateKey.HEADER_DEFAULT);
-        ls.setBodyKey(TemplateKey.BODY_STANDARD); ls.setFooterKey(TemplateKey.FOOTER_DEFAULT);
+        ls.setId(1L); ls.setHeaderKey(TemplateKey.RWD_HEADER_01);
+        ls.setFooterKey(TemplateKey.RWD_FOOTER_01);
 
         page = new Page();
         page.setId(1L); page.setSite(site); page.setPath("/about");

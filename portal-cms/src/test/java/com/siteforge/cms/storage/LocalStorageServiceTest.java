@@ -55,7 +55,7 @@ class LocalStorageServiceTest {
     @Test
     void store_unsupportedMimeType_throwsIllegalArgument() {
         MockMultipartFile file = new MockMultipartFile(
-            "file", "doc.pdf", "application/pdf", "content".getBytes());
+            "file", "page.html", "text/html", "<h1>hi</h1>".getBytes());
 
         assertThatThrownBy(() -> storageService.store(file))
             .isInstanceOf(IllegalArgumentException.class)

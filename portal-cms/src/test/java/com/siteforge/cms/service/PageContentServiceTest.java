@@ -34,19 +34,19 @@ class PageContentServiceTest {
         when(pageRepository.findById(1L)).thenReturn(Optional.of(page));
 
         PageContentRequest request = new PageContentRequest();
-        request.setBlockKey("hero");
+        request.setBlockKey("rwd_body_01");
         request.setSortOrder(0);
         request.setContentJson("{\"title\":\"Hello\"}");
 
         PageContent saved = new PageContent();
-        saved.setId(1L); saved.setPage(page); saved.setBlockKey("hero");
+        saved.setId(1L); saved.setPage(page); saved.setBlockKey("rwd_body_01");
         saved.setSortOrder(0); saved.setContentJson("{\"title\":\"Hello\"}");
         saved.setLocale("zh-TW");
         saved.setCreatedAt(LocalDateTime.now()); saved.setUpdatedAt(LocalDateTime.now());
         when(pageContentRepository.save(any())).thenReturn(saved);
 
         PageContentResponse response = pageContentService.create(1L, request);
-        assertThat(response.blockKey()).isEqualTo("hero");
+        assertThat(response.blockKey()).isEqualTo("rwd_body_01");
         assertThat(response.pageId()).isEqualTo(1L);
     }
 
@@ -54,7 +54,7 @@ class PageContentServiceTest {
     void create_pageNotFound_throwsIllegalArgument() {
         when(pageRepository.findById(99L)).thenReturn(Optional.empty());
         PageContentRequest request = new PageContentRequest();
-        request.setBlockKey("hero"); request.setContentJson("{}");
+        request.setBlockKey("rwd_body_01"); request.setContentJson("{}");
 
         assertThatThrownBy(() -> pageContentService.create(99L, request))
             .isInstanceOf(IllegalArgumentException.class)
