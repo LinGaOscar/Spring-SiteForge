@@ -4,13 +4,17 @@ import com.siteforge.cms.dto.PageContentRequest;
 import com.siteforge.cms.dto.PageContentResponse;
 import com.siteforge.domain.entity.Page;
 import com.siteforge.domain.entity.PageContent;
+import com.siteforge.domain.enums.TemplateKey;
 import com.siteforge.domain.repository.PageContentRepository;
 import com.siteforge.domain.repository.PageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,8 +58,16 @@ public class PageContentService {
         pageContentRepository.deleteById(contentId);
     }
 
+    private static final Set<String> VALID_BODY_KEYS = Arrays.stream(TemplateKey.values())
+            .filter(k -> k.name().contains("BODY"))
+            .map(k -> k.name().toLowerCase())
+            .collect(Collectors.toUnmodifiableSet());
+
     private void applyRequest(PageContent content, PageContentRequest request) {
-        content.setBlockKey(request.getBlockKey());
+        String key = request.getBlockKey() != null ? request.getBlockKey().toLowerCase() : null;
+        if (key == null || !VALID_BODY_KEYS.contains(key))
+            throw new IllegalArgumentException("blockKey 必須是合法的 Body TemplateKey，有效值：" + VALID_BODY_KEYS);
+        content.setBlockKey(key);
         content.setSortOrder(request.getSortOrder());
         content.setContentJson(request.getContentJson());
         if (request.getLocale() != null && !request.getLocale().isBlank())

@@ -7,12 +7,8 @@ import com.siteforge.domain.entity.CmsUser;
 import com.siteforge.domain.entity.Page;
 import com.siteforge.domain.enums.CmsUserRole;
 import com.siteforge.domain.enums.PageStatus;
-import com.siteforge.domain.enums.TemplateKey;
 import com.siteforge.domain.repository.PageContentRepository;
 import com.siteforge.domain.repository.PageRepository;
-
-import java.util.Arrays;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -54,9 +50,8 @@ public class CmsPageContentViewController {
                          RedirectAttributes ra) {
         CmsUser actor = cmsUserService.loadUser(ud.getUsername());
         try {
-            validateBodyKey(blockKey);
             loadAndCheck(pageId, actor);
-            PageContentRequest req = buildRequest(blockKey.toLowerCase(), sortOrder, contentJson, locale);
+            PageContentRequest req = buildRequest(blockKey, sortOrder, contentJson, locale);
             pageContentService.create(pageId, req);
             ra.addFlashAttribute("success", "區塊已新增");
         } catch (Exception e) {
@@ -76,9 +71,8 @@ public class CmsPageContentViewController {
                          RedirectAttributes ra) {
         CmsUser actor = cmsUserService.loadUser(ud.getUsername());
         try {
-            validateBodyKey(blockKey);
             loadAndCheck(pageId, actor);
-            PageContentRequest req = buildRequest(blockKey.toLowerCase(), sortOrder, contentJson, locale);
+            PageContentRequest req = buildRequest(blockKey, sortOrder, contentJson, locale);
             pageContentService.update(pageId, contentId, req);
             ra.addFlashAttribute("success", "區塊已更新");
         } catch (Exception e) {
@@ -101,19 +95,6 @@ public class CmsPageContentViewController {
             ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/cms/pages/" + pageId + "/edit";
-    }
-
-    private static final Set<String> VALID_BODY_KEYS;
-    static {
-        VALID_BODY_KEYS = new java.util.HashSet<>();
-        Arrays.stream(TemplateKey.values())
-              .filter(k -> k.name().contains("BODY"))
-              .forEach(k -> VALID_BODY_KEYS.add(k.name().toLowerCase()));
-    }
-
-    private void validateBodyKey(String blockKey) {
-        if (blockKey == null || !VALID_BODY_KEYS.contains(blockKey.toLowerCase()))
-            throw new IllegalArgumentException("blockKey 必須是合法的 Body TemplateKey：" + VALID_BODY_KEYS);
     }
 
     private Page loadAndCheck(Long pageId, CmsUser actor) {
