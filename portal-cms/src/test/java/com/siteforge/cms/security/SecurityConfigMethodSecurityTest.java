@@ -56,7 +56,7 @@ class SecurityConfigMethodSecurityTest {
     }
 
     @Test
-    @WithMockUser(roles = "MANAGER")
+    @WithMockUser(roles = "MA")
     void deleteAsManager_returns204() throws Exception {
         mockMvc.perform(delete("/api/cms/pages/1").with(csrf()))
                 .andExpect(status().isNoContent());

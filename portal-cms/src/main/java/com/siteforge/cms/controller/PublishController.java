@@ -19,14 +19,14 @@ public class PublishController {
     private final PublishService publishService;
 
     @PostMapping("/publish")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('MA')")
     public ApiResponse<PageVersionResponse> publish(@PathVariable Long pageId,
                                                      Authentication authentication) {
         return ApiResponse.ok(publishService.publish(pageId, authentication.getName()));
     }
 
     @PostMapping("/rollback")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('MA')")
     public ApiResponse<PageVersionResponse> rollback(@PathVariable Long pageId,
                                                       @RequestBody RollbackRequest request,
                                                       Authentication authentication) {
