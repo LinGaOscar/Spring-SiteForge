@@ -21,16 +21,26 @@ mvnw.cmd install -DskipTests
 ```
 
 > 專案內建 Maven Wrapper（`mvnw` / `mvnw.cmd`），不需要另外安裝 Maven。
+>
+> **Windows 注意**：CMD 請使用 `mvnw.cmd`；PowerShell 可用 `.\mvnw` 或 `.\mvnw.cmd`。
 
 ---
 
 ## 1. 啟動基礎設施
 
 ```bash
-# 複製環境變數範本並填入密碼
+# macOS / Linux：複製環境變數範本並填入密碼
 cp .env.example .env
 
-# 啟動 PostgreSQL + Redis
+# Windows CMD
+copy .env.example .env
+
+# Windows PowerShell
+Copy-Item .env.example .env
+```
+
+```bash
+# 啟動 PostgreSQL + Redis（三平台相同）
 docker compose up -d
 ```
 
@@ -101,8 +111,13 @@ mvnw.cmd spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
 # macOS / Linux
 ./mvnw test
 ./mvnw test -pl portal-cms
+./mvnw test -pl portal-cms -Dtest=LocalStorageServiceTest  # 單一測試類
 
-# Windows
+# Windows CMD
 mvnw.cmd test
 mvnw.cmd test -pl portal-cms
+mvnw.cmd test -pl portal-cms -Dtest=LocalStorageServiceTest
+
+# Windows PowerShell（-D 參數含等號時需加引號）
+.\mvnw.cmd test -pl portal-cms "-Dtest=LocalStorageServiceTest"
 ```
