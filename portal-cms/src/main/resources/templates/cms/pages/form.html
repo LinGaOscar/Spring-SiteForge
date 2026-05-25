@@ -64,6 +64,9 @@
                         <span th:text="${page?.id == null ? '建立（草稿）' : '儲存'}">送出</span>
                     </button>
                     <a th:href="@{/cms/pages}" class="btn btn-outline-secondary">取消</a>
+                    <a th:if="${page?.id != null}"
+                       th:href="@{/cms/pages/{id}/content(id=${page.id})}"
+                       class="btn btn-outline-info ms-auto">管理內容區塊 →</a>
                 </div>
             </form>
         </div>

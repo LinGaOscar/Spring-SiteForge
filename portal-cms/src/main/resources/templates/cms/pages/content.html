@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/base :: layout(${page.title} + ' — 內容區塊', ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+<main>
+    <div class="d-flex align-items-center mb-4 gap-3">
+        <a th:href="@{/cms/pages/{id}/edit(id=${page.id})}" class="btn btn-sm btn-outline-secondary">← 返回</a>
+        <div>
+            <h5 class="fw-bold mb-0">內容區塊管理</h5>
+            <div class="small text-muted" th:text="${page.title} + ' (' + ${page.path} + ')'"></div>
+        </div>
+    </div>
+
+    <!-- 現有區塊 -->
+    <div class="mb-4">
+        <h6 class="fw-semibold mb-3">現有區塊</h6>
+
+        <div th:if="${contents.empty}" class="card border-0 shadow-sm">
+            <div class="card-body text-center text-muted py-4">尚未設定任何內容區塊</div>
+        </div>
+
+        <div th:each="c : ${contents}" class="card border-0 shadow-sm mb-2">
+            <div class="card-body py-3 px-4">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="overflow-hidden me-3">
+                        <span class="badge bg-secondary me-1" th:text="${c.sortOrder}">0</span>
+                        <strong th:text="${c.blockKey}">key</strong>
+                        <span class="badge bg-light text-secondary border ms-1" th:text="${c.locale}">zh-TW</span>
+                        <div class="text-muted small font-monospace mt-1"
+                             style="max-height:36px; overflow:hidden; word-break:break-all"
+                             th:text="${c.contentJson}"></div>
+                    </div>
+                    <div class="d-flex gap-1 flex-shrink-0">
+                        <button class="btn btn-sm btn-outline-primary py-0"
+                                data-bs-toggle="collapse"
+                                th:data-bs-target="'#edit-' + ${c.id}">編輯</button>
+                        <form th:action="@{/cms/pages/{pid}/content/{cid}/delete(pid=${page.id},cid=${c.id})}"
+                              method="post"
+                              onsubmit="return confirm('確定刪除此區塊？')">
+                            <button class="btn btn-sm btn-outline-danger py-0">刪除</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="collapse mt-3" th:id="'edit-' + ${c.id}">
+                    <form th:action="@{/cms/pages/{pid}/content/{cid}(pid=${page.id},cid=${c.id})}"
+                          method="post">
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-5">
+                                <label class="form-label small fw-semibold">Block Key</label>
+                                <input type="text" name="blockKey" class="form-control form-control-sm"
+                                       th:value="${c.blockKey}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Sort Order</label>
+                                <input type="number" name="sortOrder" class="form-control form-control-sm"
+                                       th:value="${c.sortOrder}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Locale</label>
+                                <input type="text" name="locale" class="form-control form-control-sm"
+                                       th:value="${c.locale}">
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold">Content JSON</label>
+                            <textarea name="contentJson" class="form-control form-control-sm font-monospace"
+                                      rows="6" required th:text="${c.contentJson}"></textarea>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-sm btn-primary">儲存</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    data-bs-toggle="collapse"
+                                    th:data-bs-target="'#edit-' + ${c.id}">取消</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增區塊 -->
+    <div class="card border-0 shadow-sm" style="max-width:760px">
+        <div class="card-header bg-white fw-semibold small py-2">新增區塊</div>
+        <div class="card-body p-4">
+            <form th:action="@{/cms/pages/{pid}/content(pid=${page.id})}" method="post">
+                <div class="row g-2 mb-2">
+                    <div class="col-md-5">
+                        <label class="form-label small fw-semibold">Block Key <span class="text-danger">*</span></label>
+                        <input type="text" name="blockKey" class="form-control form-control-sm"
+                               placeholder="例如 hero、features、cta" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">Sort Order</label>
+                        <input type="number" name="sortOrder" class="form-control form-control-sm" value="0">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Locale</label>
+                        <input type="text" name="locale" class="form-control form-control-sm" value="zh-TW">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Content JSON <span class="text-danger">*</span></label>
+                    <textarea name="contentJson" class="form-control form-control-sm font-monospace" rows="6" required
+                              placeholder='{"key": "value"}'></textarea>
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary">新增區塊</button>
+            </form>
+        </div>
+    </div>
+</main>
+</body>
+</html>
