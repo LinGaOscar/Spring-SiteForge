@@ -62,9 +62,10 @@ public class PageController {
 
     // RWS 頁面判定：header/footer key 或任一 body block key 以 RWS_ 開頭
     private boolean isRwsPage(LayoutSet layoutSet, List<PageContentView> contents) {
-        if (layoutSet == null) return false;
-        if (layoutSet.getHeaderKey() != null && layoutSet.getHeaderKey().name().startsWith("RWS_")) return true;
-        if (layoutSet.getFooterKey() != null && layoutSet.getFooterKey().name().startsWith("RWS_")) return true;
+        if (layoutSet != null) {
+            if (layoutSet.getHeaderKey() != null && layoutSet.getHeaderKey().name().startsWith("RWS_")) return true;
+            if (layoutSet.getFooterKey() != null && layoutSet.getFooterKey().name().startsWith("RWS_")) return true;
+        }
         return contents.stream().anyMatch(b -> b.blockKey().toUpperCase().startsWith("RWS_"));
     }
 
