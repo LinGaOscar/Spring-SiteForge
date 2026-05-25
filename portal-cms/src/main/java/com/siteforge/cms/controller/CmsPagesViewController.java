@@ -6,7 +6,9 @@ import com.siteforge.domain.entity.LayoutSet;
 import com.siteforge.domain.entity.Page;
 import com.siteforge.domain.enums.CmsUserRole;
 import com.siteforge.domain.enums.PageStatus;
+import com.siteforge.domain.enums.TemplateKey;
 import com.siteforge.domain.repository.LayoutSetRepository;
+import com.siteforge.domain.repository.PageContentRepository;
 import com.siteforge.domain.repository.PageRepository;
 import com.siteforge.domain.repository.SiteRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class CmsPagesViewController {
     private final CmsUserService cmsUserService;
     private final PageRepository pageRepository;
     private final LayoutSetRepository layoutSetRepository;
+    private final PageContentRepository pageContentRepository;
     private final SiteRepository siteRepository;
 
     @GetMapping
@@ -57,8 +60,9 @@ public class CmsPagesViewController {
         }
         model.addAttribute("actor", actor);
         model.addAttribute("page", new Page());
-        model.addAttribute("layoutSets", layoutSetRepository.findAll());
         model.addAttribute("sites", siteRepository.findAll());
+        model.addAttribute("headerKeys", TemplateKey.headers());
+        model.addAttribute("footerKeys", TemplateKey.footers());
         return "cms/pages/form";
     }
 
@@ -70,18 +74,17 @@ public class CmsPagesViewController {
         Page page = pageRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Page not found: " + id));
 
-        // 只有同單位 OP 且頁面在可編輯狀態才能進入
         boolean editable = actor.getRoles().contains(CmsUserRole.OP)
                 && (page.getStatus() == PageStatus.DRAFT || page.getStatus() == PageStatus.APPROVED)
                 && unitCode(actor).equals(unitCode(page));
-        if (!editable) {
-            return "redirect:/cms/pages";
-        }
+        if (!editable) return "redirect:/cms/pages";
 
         model.addAttribute("actor", actor);
         model.addAttribute("page", page);
-        model.addAttribute("layoutSets", layoutSetRepository.findAll());
-        model.addAttribute("sites", siteRepository.findAll());
+        model.addAttribute("headerKeys", TemplateKey.headers());
+        model.addAttribute("footerKeys", TemplateKey.footers());
+        model.addAttribute("bodyKeys", TemplateKey.bodies());
+        model.addAttribute("pageContents", pageContentRepository.findByPageIdOrderBySortOrder(id));
         return "cms/pages/form";
     }
 
@@ -91,7 +94,8 @@ public class CmsPagesViewController {
                          @RequestParam(required = false) String seoTitle,
                          @RequestParam(required = false) String seoDescription,
                          @RequestParam Long siteId,
-                         @RequestParam(required = false) Long layoutSetId,
+                         @RequestParam(required = false) String headerKey,
+                         @RequestParam(required = false) String footerKey,
                          @AuthenticationPrincipal UserDetails ud,
                          RedirectAttributes ra) {
         CmsUser actor = cmsUserService.loadUser(ud.getUsername());
@@ -101,8 +105,6 @@ public class CmsPagesViewController {
         }
         var site = siteRepository.findById(siteId)
                 .orElseThrow(() -> new IllegalArgumentException("Site not found"));
-        LayoutSet layoutSet = layoutSetId != null
-                ? layoutSetRepository.findById(layoutSetId).orElse(null) : null;
 
         Page page = new Page();
         page.setSite(site);
@@ -110,15 +112,15 @@ public class CmsPagesViewController {
         page.setTitle(title);
         page.setSeoTitle(seoTitle);
         page.setSeoDescription(seoDescription);
-        page.setLayoutSet(layoutSet);
+        page.setLayoutSet(resolveLayoutSet(headerKey, footerKey, actor.getUsername()));
         page.setUnit(actor.getUnit());
         page.setStatus(PageStatus.DRAFT);
         page.setCreatedBy(actor.getUsername());
         page.setUpdatedBy(actor.getUsername());
-        pageRepository.save(page);
+        Page saved = pageRepository.save(page);
 
-        ra.addFlashAttribute("success", "頁面已建立（草稿）");
-        return "redirect:/cms/pages";
+        ra.addFlashAttribute("success", "頁面已建立（草稿），請繼續設定 Body 區塊");
+        return "redirect:/cms/pages/" + saved.getId() + "/edit";
     }
 
     @PostMapping("/{id}")
@@ -127,7 +129,8 @@ public class CmsPagesViewController {
                          @RequestParam String title,
                          @RequestParam(required = false) String seoTitle,
                          @RequestParam(required = false) String seoDescription,
-                         @RequestParam(required = false) Long layoutSetId,
+                         @RequestParam(required = false) String headerKey,
+                         @RequestParam(required = false) String footerKey,
                          @AuthenticationPrincipal UserDetails ud,
                          RedirectAttributes ra) {
         CmsUser actor = cmsUserService.loadUser(ud.getUsername());
@@ -146,13 +149,12 @@ public class CmsPagesViewController {
         page.setTitle(title);
         page.setSeoTitle(seoTitle);
         page.setSeoDescription(seoDescription);
-        page.setLayoutSet(layoutSetId != null
-                ? layoutSetRepository.findById(layoutSetId).orElse(null) : null);
+        page.setLayoutSet(resolveLayoutSet(headerKey, footerKey, actor.getUsername()));
         page.setUpdatedBy(actor.getUsername());
         pageRepository.save(page);
 
         ra.addFlashAttribute("success", "頁面已更新");
-        return "redirect:/cms/pages";
+        return "redirect:/cms/pages/" + id + "/edit";
     }
 
     @PostMapping("/{id}/delete")
@@ -174,6 +176,24 @@ public class CmsPagesViewController {
         pageRepository.deleteById(id);
         ra.addFlashAttribute("success", "頁面已刪除");
         return "redirect:/cms/pages";
+    }
+
+    // 依 headerKey + footerKey 找現有 LayoutSet，找不到則自動建立
+    private LayoutSet resolveLayoutSet(String headerKeyStr, String footerKeyStr, String username) {
+        if (headerKeyStr == null || headerKeyStr.isBlank()
+                || footerKeyStr == null || footerKeyStr.isBlank()) return null;
+        TemplateKey hk = TemplateKey.valueOf(headerKeyStr);
+        TemplateKey fk = TemplateKey.valueOf(footerKeyStr);
+        return layoutSetRepository.findByHeaderKeyAndFooterKey(hk, fk)
+                .orElseGet(() -> {
+                    LayoutSet ls = new LayoutSet();
+                    ls.setHeaderKey(hk);
+                    ls.setFooterKey(fk);
+                    ls.setName(hk.name() + " + " + fk.name());
+                    ls.setCreatedBy(username);
+                    ls.setUpdatedBy(username);
+                    return layoutSetRepository.save(ls);
+                });
     }
 
     private String unitCode(CmsUser u) {

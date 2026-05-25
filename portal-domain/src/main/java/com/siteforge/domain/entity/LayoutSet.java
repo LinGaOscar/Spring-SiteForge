@@ -25,7 +25,7 @@ public class LayoutSet {
     private TemplateKey headerKey;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "body_key", nullable = false, length = 50)
+    @Column(name = "body_key", length = 50)
     private TemplateKey bodyKey;
 
     @Enumerated(EnumType.STRING)

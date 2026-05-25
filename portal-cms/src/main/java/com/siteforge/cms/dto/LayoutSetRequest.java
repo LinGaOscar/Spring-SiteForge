@@ -9,7 +9,6 @@ import lombok.Setter;
 public class LayoutSetRequest {
     private String name;
     private TemplateKey headerKey;
-    private TemplateKey bodyKey;
     private TemplateKey footerKey;
     private String description;
     private Boolean enabled = true;

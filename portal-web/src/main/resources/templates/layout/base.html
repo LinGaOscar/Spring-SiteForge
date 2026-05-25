@@ -12,7 +12,9 @@
     <div th:replace="~{fragments/header/__${headerTemplate}__ :: header}"></div>
 
     <main>
-        <div th:replace="~{fragments/body/__${bodyTemplate}__ :: body}"></div>
+        <th:block th:each="block : ${pageContents}">
+            <div th:replace="~{fragments/body/__${block.blockKey}__ :: body}"></div>
+        </th:block>
     </main>
 
     <div th:replace="~{fragments/footer/__${footerTemplate}__ :: footer}"></div>

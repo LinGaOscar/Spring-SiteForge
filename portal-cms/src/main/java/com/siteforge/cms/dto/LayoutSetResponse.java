@@ -8,7 +8,6 @@ public record LayoutSetResponse(
     Long id,
     String name,
     TemplateKey headerKey,
-    TemplateKey bodyKey,
     TemplateKey footerKey,
     String description,
     Boolean enabled,

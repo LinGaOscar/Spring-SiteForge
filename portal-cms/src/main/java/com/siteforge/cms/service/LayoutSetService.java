@@ -50,24 +50,20 @@ public class LayoutSetService {
     private void applyRequest(LayoutSet layoutSet, LayoutSetRequest request) {
         layoutSet.setName(request.getName());
         layoutSet.setHeaderKey(request.getHeaderKey());
-        layoutSet.setBodyKey(request.getBodyKey());
         layoutSet.setFooterKey(request.getFooterKey());
         layoutSet.setDescription(request.getDescription());
         if (request.getEnabled() != null) layoutSet.setEnabled(request.getEnabled());
     }
 
-    // 確保各插槽只能使用對應前綴的 TemplateKey，避免前端誤傳錯誤 key
     private void validateTemplateKeys(LayoutSetRequest request) {
-        if (request.getHeaderKey() == null || !request.getHeaderKey().name().startsWith("HEADER_"))
-            throw new IllegalArgumentException("headerKey must be a HEADER_* TemplateKey");
-        if (request.getBodyKey() == null || !request.getBodyKey().name().startsWith("BODY_"))
-            throw new IllegalArgumentException("bodyKey must be a BODY_* TemplateKey");
-        if (request.getFooterKey() == null || !request.getFooterKey().name().startsWith("FOOTER_"))
-            throw new IllegalArgumentException("footerKey must be a FOOTER_* TemplateKey");
+        if (request.getHeaderKey() == null || !request.getHeaderKey().name().contains("HEADER"))
+            throw new IllegalArgumentException("headerKey must be a HEADER TemplateKey");
+        if (request.getFooterKey() == null || !request.getFooterKey().name().contains("FOOTER"))
+            throw new IllegalArgumentException("footerKey must be a FOOTER TemplateKey");
     }
 
     private LayoutSetResponse toResponse(LayoutSet l) {
-        return new LayoutSetResponse(l.getId(), l.getName(), l.getHeaderKey(), l.getBodyKey(),
+        return new LayoutSetResponse(l.getId(), l.getName(), l.getHeaderKey(),
             l.getFooterKey(), l.getDescription(), l.getEnabled(), l.getCreatedAt(), l.getUpdatedAt());
     }
 }

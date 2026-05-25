@@ -41,41 +41,36 @@ public class PageController {
         // 路徑不存在或未發布 → 回首頁
         return pageRenderService.findPublishedPage(siteId, path)
                 .map(page -> {
+                    List<PageContentView> contents = pageRenderService.buildContentViews(page.getId());
                     // RWS 頁面（手機限定活動頁）不允許桌面裝置開啟
-                    if (!isMobile && isRwsPage(page.getLayoutSet())) {
+                    if (!isMobile && isRwsPage(page.getLayoutSet(), contents)) {
                         return "redirect:/mobile-required";
                     }
-                    return buildModel(page, model);
+                    return buildModel(page, contents, model);
                 })
                 .orElse("redirect:/");
     }
 
-    private String buildModel(Page page, Model model) {
-        List<PageContentView> contents = pageRenderService.buildContentViews(page.getId());
-
+    private String buildModel(Page page, List<PageContentView> contents, Model model) {
         model.addAttribute("page", page);
         model.addAttribute("layoutSet", page.getLayoutSet());
         model.addAttribute("pageContents", contents);
         model.addAttribute("headerTemplate", resolveKey(page.getLayoutSet(), "header"));
-        model.addAttribute("bodyTemplate",   resolveKey(page.getLayoutSet(), "body"));
         model.addAttribute("footerTemplate", resolveKey(page.getLayoutSet(), "footer"));
-
         return "layout/base";
     }
 
-    // RWS 頁面判定：layoutSet 中任一 key 屬於手機限定模板
-    private boolean isRwsPage(LayoutSet layoutSet) {
+    // RWS 頁面判定：header/footer key 或任一 body block key 以 RWS_ 開頭
+    private boolean isRwsPage(LayoutSet layoutSet, List<PageContentView> contents) {
         if (layoutSet == null) return false;
-        return layoutSet.getHeaderKey().name().startsWith("RWS_")
-            || layoutSet.getBodyKey().name().startsWith("RWS_")
-            || layoutSet.getFooterKey().name().startsWith("RWS_");
+        if (layoutSet.getHeaderKey() != null && layoutSet.getHeaderKey().name().startsWith("RWS_")) return true;
+        if (layoutSet.getFooterKey() != null && layoutSet.getFooterKey().name().startsWith("RWS_")) return true;
+        return contents.stream().anyMatch(b -> b.blockKey().toUpperCase().startsWith("RWS_"));
     }
 
-    // RWD 頁面直接使用 layoutSet 設定的模板，Bootstrap responsive 處理手機排版
     private String resolveKey(LayoutSet layoutSet, String part) {
         TemplateKey key = switch (part) {
             case "header" -> layoutSet != null ? layoutSet.getHeaderKey() : TemplateKey.RWD_HEADER;
-            case "body"   -> layoutSet != null ? layoutSet.getBodyKey()   : TemplateKey.RWD_BODY;
             case "footer" -> layoutSet != null ? layoutSet.getFooterKey() : TemplateKey.RWD_FOOTER;
             default -> throw new IllegalArgumentException("Unknown part: " + part);
         };
