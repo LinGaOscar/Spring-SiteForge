@@ -62,7 +62,7 @@ docker compose up -d
 ./mvnw spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
 
 # Windows
-mvnw.cmd spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
+./mvnw spring-boot:run -pl portal-cms "-Dspring-boot.run.profiles=dev"
 ```
 
 首次啟動會自動執行 Flyway migration 建立所有資料表，並透過 `DataInitializer` 建立預設管理員帳號。
@@ -85,10 +85,17 @@ cms:
 ./mvnw spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
 
 # Windows
-mvnw.cmd spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
+./mvnw spring-boot:run -pl portal-web "-Dspring-boot.run.profiles=dev" 
 ```
 
 兩個應用可獨立啟動，`portal-web` 不依賴 `portal-cms` 服務。
+
+啟動後入口：
+
+| 模組 | URL |
+|------|-----|
+| portal-cms（後台） | http://localhost:8200/cms/ |
+| portal-web（前台） | http://localhost:8100/web |
 
 ---
 

@@ -89,8 +89,8 @@ Request /about
 
 ```bash
 docker compose up -d                                              # 啟動 PostgreSQL + Redis
-mvn spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev  # 後台
-mvn spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev  # 前台
+./mvnw spring-boot:run -pl portal-cms "-Dspring-boot.run.profiles=dev"  # 後台 → http://localhost:8200/cms/
+./mvnw spring-boot:run -pl portal-web "-Dspring-boot.run.profiles=dev"  # 前台 → http://localhost:8100/web
 ```
 
 ---
