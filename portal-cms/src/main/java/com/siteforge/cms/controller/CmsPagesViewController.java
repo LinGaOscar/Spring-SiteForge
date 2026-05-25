@@ -184,7 +184,7 @@ public class CmsPagesViewController {
                 || footerKeyStr == null || footerKeyStr.isBlank()) return null;
         TemplateKey hk = TemplateKey.valueOf(headerKeyStr);
         TemplateKey fk = TemplateKey.valueOf(footerKeyStr);
-        return layoutSetRepository.findByHeaderKeyAndFooterKey(hk, fk)
+        return layoutSetRepository.findFirstByHeaderKeyAndFooterKey(hk, fk)
                 .orElseGet(() -> {
                     LayoutSet ls = new LayoutSet();
                     ls.setHeaderKey(hk);

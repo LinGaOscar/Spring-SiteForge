@@ -9,5 +9,5 @@ import java.util.Optional;
 
 public interface LayoutSetRepository extends JpaRepository<LayoutSet, Long> {
     List<LayoutSet> findByEnabledTrue();
-    Optional<LayoutSet> findByHeaderKeyAndFooterKey(TemplateKey headerKey, TemplateKey footerKey);
+    Optional<LayoutSet> findFirstByHeaderKeyAndFooterKey(TemplateKey headerKey, TemplateKey footerKey);
 }
