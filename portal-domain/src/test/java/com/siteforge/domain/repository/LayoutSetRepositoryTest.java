@@ -18,17 +18,17 @@ class LayoutSetRepositoryTest {
     void saveAndFindEnabledLayouts() {
         LayoutSet enabled = new LayoutSet();
         enabled.setName("Default Layout");
-        enabled.setHeaderKey(TemplateKey.HEADER_DEFAULT);
-        enabled.setBodyKey(TemplateKey.BODY_STANDARD);
-        enabled.setFooterKey(TemplateKey.FOOTER_DEFAULT);
+        enabled.setHeaderKey(TemplateKey.RWD_HEADER_01);
+        enabled.setBodyKey(TemplateKey.RWD_BODY_01);
+        enabled.setFooterKey(TemplateKey.RWD_FOOTER_01);
         enabled.setEnabled(true);
         layoutSetRepository.save(enabled);
 
         LayoutSet disabled = new LayoutSet();
         disabled.setName("Disabled Layout");
-        disabled.setHeaderKey(TemplateKey.HEADER_DEFAULT);
-        disabled.setBodyKey(TemplateKey.BODY_LANDING);
-        disabled.setFooterKey(TemplateKey.FOOTER_DEFAULT);
+        disabled.setHeaderKey(TemplateKey.RWD_HEADER_01);
+        disabled.setBodyKey(TemplateKey.RWD_BODY_02);
+        disabled.setFooterKey(TemplateKey.RWD_FOOTER_01);
         disabled.setEnabled(false);
         layoutSetRepository.save(disabled);
 

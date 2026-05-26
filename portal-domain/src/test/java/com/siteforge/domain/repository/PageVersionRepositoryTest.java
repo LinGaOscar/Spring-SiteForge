@@ -29,8 +29,8 @@ class PageVersionRepositoryTest {
         siteRepository.save(site);
 
         LayoutSet ls = new LayoutSet();
-        ls.setName("Default"); ls.setHeaderKey(TemplateKey.HEADER_DEFAULT);
-        ls.setBodyKey(TemplateKey.BODY_STANDARD); ls.setFooterKey(TemplateKey.FOOTER_DEFAULT);
+        ls.setName("Default"); ls.setHeaderKey(TemplateKey.RWD_HEADER_01);
+        ls.setBodyKey(TemplateKey.RWD_BODY_01); ls.setFooterKey(TemplateKey.RWD_FOOTER_01);
         layoutSetRepository.save(ls);
 
         page = new Page();

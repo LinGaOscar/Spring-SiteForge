@@ -33,9 +33,9 @@ class PageRepositoryTest {
 
         layoutSet = new LayoutSet();
         layoutSet.setName("Default");
-        layoutSet.setHeaderKey(TemplateKey.HEADER_DEFAULT);
-        layoutSet.setBodyKey(TemplateKey.BODY_STANDARD);
-        layoutSet.setFooterKey(TemplateKey.FOOTER_DEFAULT);
+        layoutSet.setHeaderKey(TemplateKey.RWD_HEADER_01);
+        layoutSet.setBodyKey(TemplateKey.RWD_BODY_01);
+        layoutSet.setFooterKey(TemplateKey.RWD_FOOTER_01);
         layoutSetRepository.save(layoutSet);
     }
 
