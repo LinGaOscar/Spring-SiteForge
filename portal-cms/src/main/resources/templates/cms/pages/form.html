@@ -141,8 +141,8 @@
                         <div class="d-flex gap-2">
                             <select name="blockKey" class="form-select form-select-sm" required>
                                 <option th:each="k : ${bodyKeys}"
-                                        th:value="${k.name().toLowerCase()}"
-                                        th:text="${k.name()}">RWD_BODY_01</option>
+                                        th:value="${k.key}"
+                                        th:text="${#strings.toUpperCase(k.key)}">RWD_BODY_01</option>
                             </select>
                             <input type="hidden" name="sortOrder"
                                    th:value="${pageContents != null ? pageContents.size() : 0}">

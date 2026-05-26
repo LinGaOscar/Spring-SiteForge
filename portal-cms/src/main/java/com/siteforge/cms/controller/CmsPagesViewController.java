@@ -10,6 +10,7 @@ import com.siteforge.domain.enums.TemplateKey;
 import com.siteforge.domain.repository.LayoutSetRepository;
 import com.siteforge.domain.repository.PageContentRepository;
 import com.siteforge.domain.repository.PageRepository;
+import com.siteforge.domain.repository.ComponentDefinitionRepository;
 import com.siteforge.domain.repository.SiteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,7 @@ public class CmsPagesViewController {
     private final LayoutSetRepository layoutSetRepository;
     private final PageContentRepository pageContentRepository;
     private final SiteRepository siteRepository;
+    private final ComponentDefinitionRepository componentDefinitionRepository;
 
     @Value("${cms.preview-base-url:}")
     private String previewBaseUrl;
@@ -87,7 +89,7 @@ public class CmsPagesViewController {
         model.addAttribute("page", page);
         model.addAttribute("headerKeys", TemplateKey.headers());
         model.addAttribute("footerKeys", TemplateKey.footers());
-        model.addAttribute("bodyKeys", TemplateKey.bodies());
+        model.addAttribute("bodyKeys", componentDefinitionRepository.findByTypeAndActiveTrue("BODY"));
         model.addAttribute("pageContents", pageContentRepository.findByPageIdOrderBySortOrder(id));
         model.addAttribute("previewBaseUrl", previewBaseUrl);
         return "cms/pages/form";
