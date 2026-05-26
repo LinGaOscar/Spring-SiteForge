@@ -17,7 +17,7 @@
 ./mvnw install -DskipTests
 
 # Windows（Command Prompt 或 PowerShell）
-mvnw.cmd install -DskipTests
+./mvnw.cmd install -DskipTests
 ```
 
 > 專案內建 Maven Wrapper（`mvnw` / `mvnw.cmd`），不需要另外安裝 Maven。
@@ -63,7 +63,8 @@ docker compose up -d
 | 單位 | `00100` |
 | 角色 | `OP + MA` |
 
-> **重置 DB**：`docker compose down -v && docker compose up -d`（清除 volume，重新執行 init SQL）
+> **重置 DB**：（清除 volume，重新執行 init SQL）
+`docker compose down -v && docker compose up -d`
 
 ---
 
@@ -72,9 +73,6 @@ docker compose up -d
 ```bash
 # macOS / Linux
 ./mvnw spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
-
-# Windows CMD
-mvnw.cmd spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
 
 # Windows PowerShell
 .\mvnw.cmd spring-boot:run -pl portal-cms "-Dspring-boot.run.profiles=dev"
@@ -87,9 +85,6 @@ mvnw.cmd spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
 ```bash
 # macOS / Linux
 ./mvnw spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
-
-# Windows CMD
-mvnw.cmd spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
 
 # Windows PowerShell
 .\mvnw.cmd spring-boot:run -pl portal-web "-Dspring-boot.run.profiles=dev"

@@ -91,8 +91,8 @@ Request /about
 
 ```bash
 docker compose up -d                                                      # 啟動 PostgreSQL（首次自動執行 db/init/*.sql）
-./mvnw spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev     # 前台 → http://localhost:8100（同時同步 component_definition）
-./mvnw spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev     # 後台 → http://localhost:8200/cms/
+./mvnw spring-boot:run -pl portal-web "-Dspring-boot.run.profiles=dev"     # 前台 → http://localhost:8100（同時同步 component_definition）
+./mvnw spring-boot:run -pl portal-cms "-Dspring-boot.run.profiles=dev"     # 後台 → http://localhost:8200/cms/
 ```
 
 > **注意**：建議先啟動 portal-web，讓 `ComponentSyncRunner` 完成 body 元件掃描後，CMS 的元件下拉選單才會有資料。
