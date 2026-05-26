@@ -3,8 +3,6 @@ spring:
     name: portal-web
   jpa:
     open-in-view: false
-  flyway:
-    enabled: false
   data:
     redis:
       host: ${SPRING_DATA_REDIS_HOST:localhost}
