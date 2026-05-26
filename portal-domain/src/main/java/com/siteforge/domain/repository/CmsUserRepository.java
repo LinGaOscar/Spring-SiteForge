@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface CmsUserRepository extends JpaRepository<CmsUser, Long> {
 
-    @EntityGraph(attributePaths = {"unit"})
+    @EntityGraph(attributePaths = {"unit", "roles"})
     Optional<CmsUser> findByUsername(String username);
 }

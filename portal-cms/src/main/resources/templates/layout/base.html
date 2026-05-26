@@ -27,19 +27,19 @@
         <ul class="nav flex-column gap-1 flex-grow-1">
             <li class="nav-item">
                 <a class="nav-link" th:href="@{/cms/dashboard}"
-                   th:classappend="${#httpServletRequest.requestURI.contains('/dashboard')} ? 'active'">
+                   th:classappend="${currentUri.contains('/dashboard')} ? 'active'">
                     📊 Dashboard
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" th:href="@{/cms/pages}"
-                   th:classappend="${#httpServletRequest.requestURI.contains('/pages')} ? 'active'">
+                   th:classappend="${currentUri.contains('/pages')} ? 'active'">
                     📄 頁面管理
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" th:href="@{/cms/assets}"
-                   th:classappend="${#httpServletRequest.requestURI.contains('/assets')} ? 'active'">
+                   th:classappend="${currentUri.contains('/assets')} ? 'active'">
                     🖼 素材管理
                 </a>
             </li>
