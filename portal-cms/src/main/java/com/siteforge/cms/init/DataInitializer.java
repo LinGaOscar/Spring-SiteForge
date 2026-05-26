@@ -38,10 +38,12 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
+        seedUnits();
+
         if (userRepository.count() == 0) {
             // 預設管理員帳號屬於 00100，同時擁有 OP + MA 方便開發測試完整流程
             Unit unit = unitRepository.findById("00100")
-                    .orElseThrow(() -> new IllegalStateException("Unit 00100 not found, V5 migration may not have run"));
+                    .orElseThrow(() -> new IllegalStateException("Unit 00100 not found"));
 
             CmsUser admin = new CmsUser();
             admin.setUsername(adminUsername);
@@ -61,6 +63,22 @@ public class DataInitializer implements CommandLineRunner {
             site.setDomain("localhost");
             siteRepository.save(site);
             log.info("=== Dev seed: site default ===");
+        }
+    }
+
+    private void seedUnits() {
+        seedUnit("00100", "單位 00100");
+        seedUnit("00800", "單位 00800");
+        seedUnit("00850", "單位 00850");
+    }
+
+    private void seedUnit(String code, String name) {
+        if (!unitRepository.existsById(code)) {
+            Unit u = new Unit();
+            u.setCode(code);
+            u.setName(name);
+            unitRepository.save(u);
+            log.info("=== Dev seed: unit {} ===", code);
         }
     }
 }
