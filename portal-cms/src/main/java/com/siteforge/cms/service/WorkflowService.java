@@ -1,9 +1,11 @@
 package com.siteforge.cms.service;
 
 import com.siteforge.domain.entity.CmsUser;
+import com.siteforge.domain.entity.LayoutSet;
 import com.siteforge.domain.entity.Page;
 import com.siteforge.domain.enums.CmsUserRole;
 import com.siteforge.domain.enums.PageStatus;
+import com.siteforge.domain.repository.PageContentRepository;
 import com.siteforge.domain.repository.PageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.time.LocalDateTime;
 public class WorkflowService {
 
     private final PageRepository pageRepository;
+    private final PageContentRepository pageContentRepository;
     private final CmsUserService userService;
     private final PublishService publishService;
 
@@ -26,6 +29,7 @@ public class WorkflowService {
         checkUnit(page, actor);
         checkRole(actor, CmsUserRole.OP);
         checkStatus(page, PageStatus.DRAFT);
+        checkPageComplete(page);
 
         page.setStatus(PageStatus.PENDING_REVIEW);
         page.setSubmittedAt(LocalDateTime.now());
@@ -161,6 +165,17 @@ public class WorkflowService {
     private void checkNotSelf(Page page, CmsUser actor) {
         if (actor.getUsername().equals(page.getSubmittedBy())) {
             throw new IllegalStateException("不能審核自己送出的申請");
+        }
+    }
+
+    /** 送審前確認頁面結構完整：需有 Header、Footer 與至少一個 Body 區塊 */
+    private void checkPageComplete(Page page) {
+        LayoutSet ls = page.getLayoutSet();
+        if (ls == null || ls.getHeaderKey() == null || ls.getFooterKey() == null) {
+            throw new IllegalStateException("頁面必須設定 Header 與 Footer 才能送審");
+        }
+        if (pageContentRepository.findByPageIdOrderBySortOrder(page.getId()).isEmpty()) {
+            throw new IllegalStateException("頁面必須加入至少一個 Body 區塊才能送審");
         }
     }
 }

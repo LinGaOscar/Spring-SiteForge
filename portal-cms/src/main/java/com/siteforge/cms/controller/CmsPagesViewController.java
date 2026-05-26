@@ -12,6 +12,7 @@ import com.siteforge.domain.repository.PageContentRepository;
 import com.siteforge.domain.repository.PageRepository;
 import com.siteforge.domain.repository.SiteRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -31,6 +32,9 @@ public class CmsPagesViewController {
     private final LayoutSetRepository layoutSetRepository;
     private final PageContentRepository pageContentRepository;
     private final SiteRepository siteRepository;
+
+    @Value("${cms.preview-base-url:}")
+    private String previewBaseUrl;
 
     @GetMapping
     public String list(@RequestParam(required = false) String status,
@@ -85,6 +89,7 @@ public class CmsPagesViewController {
         model.addAttribute("footerKeys", TemplateKey.footers());
         model.addAttribute("bodyKeys", TemplateKey.bodies());
         model.addAttribute("pageContents", pageContentRepository.findByPageIdOrderBySortOrder(id));
+        model.addAttribute("previewBaseUrl", previewBaseUrl);
         return "cms/pages/form";
     }
 
