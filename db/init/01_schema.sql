@@ -117,3 +117,11 @@ CREATE TABLE asset (
     created_at  TIMESTAMP    NOT NULL DEFAULT NOW(),
     created_by  VARCHAR(100)
 );
+
+-- 元件定義（由 portal-web 啟動時掃描 body fragment 自動同步）
+CREATE TABLE component_definition (
+    key        VARCHAR(100) NOT NULL PRIMARY KEY,
+    type       VARCHAR(20)  NOT NULL CHECK (type IN ('BODY','HEADER','FOOTER')),
+    active     BOOLEAN      NOT NULL DEFAULT TRUE,
+    synced_at  TIMESTAMP    NOT NULL DEFAULT NOW()
+);
