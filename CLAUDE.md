@@ -20,7 +20,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # 初始化（首次 clone 或 CI）
 ./mvnw install -DskipTests
 
-# 啟動（portal-cms 先啟動以執行 Flyway migration）
+# 啟動基礎設施（PostgreSQL + Redis），首次啟動自動執行 db/init/*.sql
+docker compose up -d
+
+# 啟動應用
 ./mvnw spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
 ./mvnw spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
 
@@ -31,9 +34,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./mvnw test -pl portal-cms
 ./mvnw test -pl portal-domain
 ./mvnw test -pl portal-cms -Dtest=LocalStorageServiceTest  # 單一測試類
-```
 
-Flyway migration 只在 `portal-cms` 啟動時執行，`portal-web` 設定 `spring.flyway.enabled=false`。
+# 重置 DB（清除所有資料，重新執行 init SQL）
+docker compose down -v && docker compose up -d
+```
 
 ## 架構核心原則
 
@@ -126,22 +130,21 @@ POST /cms/assets/upload     上傳（OP / MA 可操作）
 POST /cms/assets/{id}/delete 刪除（同單位 OP / MA 限定）
 ```
 
-## Flyway Migration 順序
+## DB Schema 管理
 
-| Version | 內容 |
-|---------|------|
-| V1 | cms_user、cms_role（已廢棄，V5 重建） |
-| V2 | site、layout_set |
-| V3 | page、page_content |
-| V4 | page_version、asset |
-| V5 | unit 表、角色重構（cms_user_role 改為字串）、page/asset/cms_user 加入 unit_code |
+Schema 和種子資料由 Docker Compose 在**首次建立容器**時執行，與應用完全解耦：
 
-新 migration 腳本放在 `portal-cms/src/main/resources/db/migration/`，命名格式：`V{n}__{描述}.sql`。
+| 檔案 | 內容 |
+|------|------|
+| `db/init/01_schema.sql` | 完整 DDL（所有資料表） |
+| `db/init/02_seed.sql` | 種子資料（unit、admin 帳號、site、layout_set、預設頁面） |
+
+Schema 變更直接修改 `01_schema.sql`，重置 DB 用 `docker compose down -v && docker compose up -d`。
 
 ## 開發注意事項
 
-- Dev seed 帳號設定在 `portal-cms/src/main/resources/application-dev.yml`（`cms.init.admin-*`），`DataInitializer` 只在 `dev` profile 執行，預設帳號屬於 unit `00100`，同時持有 `OP + MA`。
-- 固定單位：`00100`、`00800`、`00850`（由 V5 migration 種子資料建立）。
+- Dev 管理員帳號（`manager` / `siteforge2026`）由 `db/init/02_seed.sql` 建立，使用 pgcrypto bcrypt，與 Spring Security 相容。
+- 固定單位：`00100`、`00800`、`00850`。
 - `CmsUserService.loadUser(username)` 是所有 CMS controller 取得當前使用者（含 unit）的共用入口。
 - 新增 TemplateKey 值時必須同步建立對應的 HTML fragment 檔案，否則 Thymeleaf 渲染會拋例外。
 - SSO 登入為預留介面，目前僅實作帳密登入。

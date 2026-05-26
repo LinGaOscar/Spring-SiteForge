@@ -41,6 +41,7 @@ Copy-Item .env.example .env
 
 ```bash
 # 啟動 PostgreSQL + Redis（三平台相同）
+# 首次啟動時自動執行 db/init/01_schema.sql 和 02_seed.sql 建立 schema 與種子資料
 docker compose up -d
 ```
 
@@ -53,27 +54,30 @@ docker compose up -d
 | Username | `siteforge` |
 | Redis host | `localhost:6379` |
 
+預設管理員帳號（由 `db/init/02_seed.sql` 建立）：
+
+| 欄位 | 值 |
+|------|-----|
+| 帳號 | `manager` |
+| 密碼 | `siteforge2026` |
+| 單位 | `00100` |
+| 角色 | `OP + MA` |
+
+> **重置 DB**：`docker compose down -v && docker compose up -d`（清除 volume，重新執行 init SQL）
+
 ---
 
-## 2. 啟動 portal-cms（後台 + Flyway migration）
+## 2. 啟動 portal-cms（後台）
 
 ```bash
 # macOS / Linux
 ./mvnw spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
 
-# Windows
-./mvnw spring-boot:run -pl portal-cms "-Dspring-boot.run.profiles=dev"
-```
+# Windows CMD
+mvnw.cmd spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
 
-首次啟動會自動執行 Flyway migration 建立所有資料表，並透過 `DataInitializer` 建立預設管理員帳號。
-
-預設管理員帳號設定於 `portal-cms/src/main/resources/application-dev.yml`：
-
-```yaml
-cms:
-  init:
-    admin-username: manager
-    admin-password: siteforge2026
+# Windows PowerShell
+.\mvnw.cmd spring-boot:run -pl portal-cms "-Dspring-boot.run.profiles=dev"
 ```
 
 ---
@@ -84,8 +88,11 @@ cms:
 # macOS / Linux
 ./mvnw spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
 
-# Windows
-./mvnw spring-boot:run -pl portal-web "-Dspring-boot.run.profiles=dev" 
+# Windows CMD
+mvnw.cmd spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
+
+# Windows PowerShell
+.\mvnw.cmd spring-boot:run -pl portal-web "-Dspring-boot.run.profiles=dev"
 ```
 
 兩個應用可獨立啟動，`portal-web` 不依賴 `portal-cms` 服務。
