@@ -4,6 +4,7 @@ import com.siteforge.cms.dto.PageContentRequest;
 import com.siteforge.cms.dto.PageContentResponse;
 import com.siteforge.domain.entity.Page;
 import com.siteforge.domain.entity.PageContent;
+import com.siteforge.domain.repository.ComponentDefinitionRepository;
 import com.siteforge.domain.repository.PageContentRepository;
 import com.siteforge.domain.repository.PageRepository;
 import org.junit.jupiter.api.Test;
@@ -25,13 +26,15 @@ class PageContentServiceTest {
 
     @Mock PageContentRepository pageContentRepository;
     @Mock PageRepository pageRepository;
+    @Mock ComponentDefinitionRepository componentDefinitionRepository;
     @InjectMocks PageContentService pageContentService;
 
     @Test
-    void create_validPageId_returnsSavedContent() {
+    void create_validBlockKey_returnsSavedContent() {
         Page page = new Page();
         page.setId(1L);
         when(pageRepository.findById(1L)).thenReturn(Optional.of(page));
+        when(componentDefinitionRepository.existsByKeyAndTypeAndActiveTrue("rwd_body_01", "BODY")).thenReturn(true);
 
         PageContentRequest request = new PageContentRequest();
         request.setBlockKey("rwd_body_01");
@@ -48,6 +51,22 @@ class PageContentServiceTest {
         PageContentResponse response = pageContentService.create(1L, request);
         assertThat(response.blockKey()).isEqualTo("rwd_body_01");
         assertThat(response.pageId()).isEqualTo(1L);
+    }
+
+    @Test
+    void create_invalidBlockKey_throwsIllegalArgument() {
+        Page page = new Page();
+        page.setId(1L);
+        when(pageRepository.findById(1L)).thenReturn(Optional.of(page));
+        when(componentDefinitionRepository.existsByKeyAndTypeAndActiveTrue("unknown_key", "BODY")).thenReturn(false);
+
+        PageContentRequest request = new PageContentRequest();
+        request.setBlockKey("unknown_key");
+        request.setContentJson("{}");
+
+        assertThatThrownBy(() -> pageContentService.create(1L, request))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("blockKey 不在已登記的元件清單中");
     }
 
     @Test
