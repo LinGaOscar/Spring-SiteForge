@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class ComponentSyncRunnerTest {
@@ -41,7 +42,7 @@ class ComponentSyncRunnerTest {
         runner.run(null);
 
         ArgumentCaptor<ComponentDefinition> captor = ArgumentCaptor.forClass(ComponentDefinition.class);
-        verify(componentDefinitionRepository).save(captor.capture());
+        verify(componentDefinitionRepository, times(1)).save(captor.capture());
         ComponentDefinition saved = captor.getValue();
         assertThat(saved.getKey()).isEqualTo("rwd_body_04");
         assertThat(saved.getType()).isEqualTo("BODY");

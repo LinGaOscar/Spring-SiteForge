@@ -138,6 +138,11 @@
                     <!-- 新增 Body 區塊 -->
                     <form th:action="@{/cms/pages/{pid}/content(pid=${page.id})}" method="post">
                         <label class="form-label small fw-semibold">新增 Body 模板</label>
+                        <!-- portal-web 尚未啟動掃描時，bodyKeys 為空，提示使用者 -->
+                        <div th:if="${bodyKeys == null or #lists.isEmpty(bodyKeys)}"
+                             class="alert alert-warning py-2 small mb-2">
+                            元件清單尚未同步，請先啟動 portal-web 完成掃描。
+                        </div>
                         <div class="d-flex gap-2">
                             <select name="blockKey" class="form-select form-select-sm" required>
                                 <option th:each="k : ${bodyKeys}"
