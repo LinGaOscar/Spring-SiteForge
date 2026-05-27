@@ -69,6 +69,8 @@ CREATE TABLE page (
     layout_set_id   BIGINT       REFERENCES layout_set(id),
     status          VARCHAR(20)  NOT NULL DEFAULT 'DRAFT',
     unit_code       VARCHAR(5)   REFERENCES unit(code),
+    header_config_json TEXT,
+    footer_config_json TEXT,
     review_note     VARCHAR(500),
     submitted_at    TIMESTAMP,
     submitted_by    VARCHAR(100),
@@ -79,7 +81,7 @@ CREATE TABLE page (
     UNIQUE (site_id, path)
 );
 
--- Body 區塊（多區塊疊加，依 sort_order 排序渲染）
+-- Body 區塊（多區塊疊加，依 sort_order 排序渲染；同一頁可重複使用相同 block_key）
 CREATE TABLE page_content (
     id           BIGSERIAL    PRIMARY KEY,
     page_id      BIGINT       NOT NULL REFERENCES page(id) ON DELETE CASCADE,
@@ -88,8 +90,7 @@ CREATE TABLE page_content (
     content_json TEXT         NOT NULL,
     locale       VARCHAR(10)  NOT NULL DEFAULT 'zh-TW',
     created_at   TIMESTAMP    NOT NULL DEFAULT NOW(),
-    updated_at   TIMESTAMP    NOT NULL DEFAULT NOW(),
-    UNIQUE (page_id, block_key, locale)
+    updated_at   TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
 -- 版本快照（每次發布時建立）
@@ -118,10 +119,12 @@ CREATE TABLE asset (
     created_by  VARCHAR(100)
 );
 
--- 元件定義（由 portal-web 啟動時掃描 body fragment 自動同步）
+-- 元件定義（由 portal-web 啟動時掃描 fragment 自動同步）
 CREATE TABLE component_definition (
-    key        VARCHAR(100) NOT NULL PRIMARY KEY,
-    type       VARCHAR(20)  NOT NULL CHECK (type IN ('BODY','HEADER','FOOTER')),
-    active     BOOLEAN      NOT NULL DEFAULT TRUE,
-    synced_at  TIMESTAMP    NOT NULL DEFAULT NOW()
+    key         VARCHAR(100) NOT NULL PRIMARY KEY,
+    type        VARCHAR(20)  NOT NULL CHECK (type IN ('BODY','HEADER','FOOTER')),
+    active      BOOLEAN      NOT NULL DEFAULT TRUE,
+    synced_at   TIMESTAMP    NOT NULL DEFAULT NOW(),
+    schema_json TEXT,
+    device_mode VARCHAR(20)  NOT NULL DEFAULT 'RWD'
 );
