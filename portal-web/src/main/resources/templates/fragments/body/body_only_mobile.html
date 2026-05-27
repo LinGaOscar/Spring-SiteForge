@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="body(config)">
+<script th:inline="none">
+(function () {
+    var isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (!isMobile) {
+        window.addEventListener('DOMContentLoaded', function () {
+            alert('此頁面僅供行動裝置瀏覽，即將返回首頁。');
+            window.location.href = '/';
+        });
+    }
+}());
+</script>
+</div>
+</body>
+</html>
