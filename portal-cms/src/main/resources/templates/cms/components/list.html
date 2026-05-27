@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/base :: layout('元件管理', ~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+<main>
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h5 class="fw-bold mb-0">元件管理</h5>
+        <span class="text-muted small">元件由 portal-web 啟動時自動掃描同步</span>
+    </div>
+
+    <!-- 空清單提示 -->
+    <div th:if="${#lists.isEmpty(components)}" class="alert alert-warning">
+        尚無元件資料，請先啟動 portal-web 讓 ComponentSyncRunner 完成掃描。
+    </div>
+
+    <!-- 元件卡片列表 -->
+    <div class="accordion" id="componentAccordion">
+        <div class="accordion-item border-0 shadow-sm mb-3"
+             th:each="c, stat : ${components}">
+
+            <!-- 標題列 -->
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed py-3 bg-white"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        th:data-bs-target="'#comp-' + ${stat.index}"
+                        th:attr="aria-controls='comp-' + ${stat.index}">
+                    <div class="d-flex align-items-center gap-2 w-100">
+                        <code class="text-primary fs-6" th:text="${c.key}">key</code>
+                        <span class="badge bg-secondary" th:text="${c.type}">BODY</span>
+                        <span th:if="${c.active}"    class="badge bg-success">啟用</span>
+                        <span th:unless="${c.active}" class="badge bg-danger">停用</span>
+                        <span class="ms-auto text-muted small me-3"
+                              th:text="'同步：' + ${#temporals.format(c.syncedAt,'yyyy/MM/dd HH:mm')}"></span>
+                        <a th:if="${previewBaseUrl != null and !#strings.isEmpty(previewBaseUrl)}"
+                           th:href="${previewBaseUrl + '/preview/component/' + c.key}"
+                           target="_blank"
+                           class="btn btn-sm btn-outline-secondary me-2"
+                           onclick="event.stopPropagation()">↗ 新分頁</a>
+                    </div>
+                </button>
+            </h2>
+
+            <!-- 展開區：iframe 預覽 -->
+            <div class="accordion-collapse collapse"
+                 th:id="'comp-' + ${stat.index}">
+                <div class="accordion-body p-0">
+                    <!-- portal-web 未設定時顯示提示 -->
+                    <div th:if="${previewBaseUrl == null or #strings.isEmpty(previewBaseUrl)}"
+                         class="p-3 text-muted small">
+                        預覽需在 <code>application-dev.yml</code> 設定 <code>cms.preview-base-url</code>。
+                    </div>
+                    <!-- iframe 採用 data-src 延遲載入，展開時才由 JS 賦值給 src -->
+                    <iframe th:if="${previewBaseUrl != null and !#strings.isEmpty(previewBaseUrl)}"
+                            th:data-src="${previewBaseUrl + '/preview/component/' + c.key}"
+                            width="100%" height="500" frameborder="0"
+                            style="display:block;"
+                            class="component-preview-frame"></iframe>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<!-- iframe 延遲載入：accordion 展開時才設定 src，避免頁面載入時同時發出所有請求 -->
+<script th:inline="none">
+document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(function(btn) {
+    var targetId = btn.getAttribute('data-bs-target');
+    var panel = document.querySelector(targetId);
+    if (!panel) return;
+    panel.addEventListener('show.bs.collapse', function() {
+        var frame = panel.querySelector('.component-preview-frame');
+        if (frame && !frame.src) {
+            frame.src = frame.dataset.src;
+        }
+    });
+});
+</script>
+</body>
+</html>
