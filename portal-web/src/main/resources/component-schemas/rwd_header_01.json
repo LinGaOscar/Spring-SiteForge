@@ -1,0 +1,7 @@
+{
+  "deviceMode": "RWD",
+  "fields": [
+    {"name": "logoText", "type": "text", "label": "Logo 文字", "default": "SpringSiteForge"},
+    {"name": "navLinks", "type": "links", "label": "選單連結", "default": []}
+  ]
+}

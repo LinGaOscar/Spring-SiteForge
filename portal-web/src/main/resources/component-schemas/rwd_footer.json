@@ -1,0 +1,12 @@
+{
+  "deviceMode": "RWD",
+  "fields": [
+    {"name": "brand", "type": "text", "label": "品牌名稱", "default": "SpringSiteForge"},
+    {"name": "tagline", "type": "text", "label": "品牌說明", "default": "企業官網 CMS 平台"},
+    {"name": "copyright", "type": "text", "label": "版權文字", "default": "SpringSiteForge"},
+    {"name": "navLinks", "type": "links", "label": "快速連結", "default": []},
+    {"name": "contactEmail", "type": "text", "label": "聯絡 Email", "default": "contact@example.com"},
+    {"name": "contactPhone", "type": "text", "label": "聯絡電話", "default": "02-1234-5678"},
+    {"name": "address", "type": "text", "label": "地址", "default": "台北市信義區"}
+  ]
+}

@@ -1,5 +1,7 @@
 package com.siteforge.web.runner;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siteforge.domain.entity.ComponentDefinition;
 import com.siteforge.domain.repository.ComponentDefinitionRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +13,10 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,11 +27,14 @@ public class ComponentSyncRunner implements ApplicationRunner {
 
     private final ComponentDefinitionRepository componentDefinitionRepository;
     private final ResourcePatternResolver resourcePatternResolver;
+    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) throws Exception {
-        syncType("BODY", "classpath:templates/fragments/body/*.html");
+        syncType("BODY",   "classpath:templates/fragments/body/*.html");
+        syncType("HEADER", "classpath:templates/fragments/header/*.html");
+        syncType("FOOTER", "classpath:templates/fragments/footer/*.html");
     }
 
     private void syncType(String type, String pattern) throws Exception {
@@ -45,7 +52,7 @@ public class ComponentSyncRunner implements ApplicationRunner {
                     componentDefinitionRepository.save(cd);
                 });
 
-        // 新增或重新啟用已存在的 key
+        // 新增或重新啟用，並讀取 schema JSON
         for (String key : found) {
             ComponentDefinition cd = componentDefinitionRepository.findById(key)
                     .orElseGet(() -> {
@@ -56,9 +63,29 @@ public class ComponentSyncRunner implements ApplicationRunner {
             cd.setType(type);
             cd.setActive(true);
             cd.setSyncedAt(LocalDateTime.now());
+            loadSchema(cd, key);
             componentDefinitionRepository.save(cd);
         }
 
         log.info("元件同步完成 [{}]: {} 個 active", type, found.size());
+    }
+
+    private void loadSchema(ComponentDefinition cd, String key) {
+        try {
+            Resource schemaResource = resourcePatternResolver.getResource(
+                    "classpath:component-schemas/" + key + ".json");
+            if (!schemaResource.exists()) {
+                cd.setDeviceMode("RWD");
+                return;
+            }
+            String rawJson = new String(schemaResource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            cd.setSchemaJson(rawJson);
+            Map<String, Object> schemaMap = objectMapper.readValue(rawJson, new TypeReference<>() {});
+            Object dm = schemaMap.get("deviceMode");
+            cd.setDeviceMode(dm instanceof String s ? s : "RWD");
+        } catch (Exception e) {
+            log.warn("無法讀取元件 schema [{}]: {}", key, e.getMessage());
+            cd.setDeviceMode("RWD");
+        }
     }
 }

@@ -1,0 +1,12 @@
+{
+  "deviceMode": "RWD",
+  "fields": [
+    {"name": "logoText", "type": "text", "label": "Logo 文字", "default": "SpringSiteForge"},
+    {"name": "navLinks", "type": "links", "label": "選單連結", "default": [
+      {"label": "首頁", "url": "/"},
+      {"label": "關於我們", "url": "/about"},
+      {"label": "服務項目", "url": "/services"},
+      {"label": "聯絡我們", "url": "/contact"}
+    ]}
+  ]
+}

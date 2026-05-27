@@ -1,0 +1,8 @@
+{
+  "deviceMode": "RWD",
+  "fields": [
+    {"name": "brand", "type": "text", "label": "品牌名稱", "default": "SpringSiteForge"},
+    {"name": "copyright", "type": "text", "label": "版權文字", "default": "SpringSiteForge"},
+    {"name": "navLinks", "type": "links", "label": "快速連結", "default": []}
+  ]
+}
