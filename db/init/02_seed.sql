@@ -22,6 +22,16 @@ SELECT id, 'OP' FROM cms_user WHERE username = 'manager'
 UNION ALL
 SELECT id, 'MA' FROM cms_user WHERE username = 'manager';
 
+-- manager2：dev 測試用第二帳號（OP + MA，unit 00100）
+-- 明文密碼：siteforge2026
+INSERT INTO cms_user (username, password, enabled, unit_code)
+VALUES ('manager2', crypt('siteforge2026', gen_salt('bf', 10)), TRUE, '00100');
+
+INSERT INTO cms_user_role (user_id, role)
+SELECT id, 'OP' FROM cms_user WHERE username = 'manager2'
+UNION ALL
+SELECT id, 'MA' FROM cms_user WHERE username = 'manager2';
+
 -- 站台
 INSERT INTO site (code, name, domain, created_by)
 VALUES ('default', 'SpringSiteForge', 'localhost', 'system');
