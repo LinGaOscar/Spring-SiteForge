@@ -148,4 +148,52 @@ class ComponentSyncRunnerTest {
         assertThat(saved.getDeviceMode()).isEqualTo("RWD");
         assertThat(saved.getSchemaJson()).isNull();
     }
+
+    @Test
+    void run_schemaWithNestedObjects_parsedCorrectly() throws Exception {
+        String html = """
+                <!DOCTYPE html>
+                <html xmlns:th="http://www.thymeleaf.org">
+                <body>
+                <!--@component-schema
+                {
+                  "deviceMode": "RWD",
+                  "fields": [
+                    {"name": "navLinks", "type": "links", "label": "選單連結", "default": [
+                      {"label": "首頁", "url": "/"},
+                      {"label": "關於我們", "url": "/about"}
+                    ]}
+                  ]
+                }
+                @end-component-schema-->
+                <div th:fragment="header(config)"></div>
+                </body>
+                </html>
+                """;
+        Resource htmlResource = new ByteArrayResource(html.getBytes()) {
+            @Override public String getFilename() { return "rwd_header.html"; }
+        };
+        when(resourcePatternResolver.getResources("classpath:templates/fragments/body/*.html"))
+                .thenReturn(new Resource[0]);
+        when(resourcePatternResolver.getResources("classpath:templates/fragments/header/*.html"))
+                .thenReturn(new Resource[]{htmlResource});
+        when(resourcePatternResolver.getResources("classpath:templates/fragments/footer/*.html"))
+                .thenReturn(new Resource[0]);
+        when(componentDefinitionRepository.findByTypeAndActiveTrue(anyString()))
+                .thenReturn(Collections.emptyList());
+        when(componentDefinitionRepository.findById("rwd_header"))
+                .thenReturn(Optional.empty());
+        when(componentDefinitionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        componentSyncRunner.run(null);
+
+        ArgumentCaptor<ComponentDefinition> captor = ArgumentCaptor.forClass(ComponentDefinition.class);
+        verify(componentDefinitionRepository, atLeastOnce()).save(captor.capture());
+        ComponentDefinition saved = captor.getAllValues().stream()
+                .filter(cd -> "rwd_header".equals(cd.getKey()))
+                .findFirst().orElseThrow();
+        assertThat(saved.getDeviceMode()).isEqualTo("RWD");
+        assertThat(saved.getSchemaJson()).contains("navLinks");
+        assertThat(saved.getSchemaJson()).contains("關於我們");
+    }
 }

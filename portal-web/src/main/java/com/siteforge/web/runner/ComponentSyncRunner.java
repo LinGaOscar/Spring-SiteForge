@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class ComponentSyncRunner implements ApplicationRunner {
 
     private static final Pattern SCHEMA_PATTERN = Pattern.compile(
-            "<!--@component-schema\\s*(\\{.*?\\})\\s*@end-component-schema-->",
+            "<!--@component-schema\\s*(.*?)\\s*@end-component-schema-->",
             Pattern.DOTALL);
 
     private final ComponentDefinitionRepository componentDefinitionRepository;
