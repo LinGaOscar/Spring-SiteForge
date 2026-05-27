@@ -34,6 +34,12 @@ public class Page {
     @Column(name = "seo_description", length = 500)
     private String seoDescription;
 
+    @Column(name = "header_config_json", columnDefinition = "TEXT")
+    private String headerConfigJson;
+
+    @Column(name = "footer_config_json", columnDefinition = "TEXT")
+    private String footerConfigJson;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "layout_set_id")
     private LayoutSet layoutSet;

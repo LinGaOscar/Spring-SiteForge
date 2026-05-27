@@ -27,4 +27,10 @@ public class ComponentDefinition {
 
     @Column(name = "synced_at", nullable = false)
     private LocalDateTime syncedAt;
+
+    @Column(name = "schema_json", columnDefinition = "TEXT")
+    private String schemaJson;
+
+    @Column(name = "device_mode", nullable = false, length = 20)
+    private String deviceMode = "RWD";
 }

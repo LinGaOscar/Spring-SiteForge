@@ -8,8 +8,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "page_content",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"page_id", "block_key", "locale"}))
+@Table(name = "page_content")
 @Getter @Setter @NoArgsConstructor
 public class PageContent {
 
