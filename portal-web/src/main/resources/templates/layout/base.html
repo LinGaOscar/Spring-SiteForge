@@ -9,7 +9,7 @@
 </head>
 <body>
 
-    <div th:replace="~{fragments/header/__${headerTemplate}__ :: header}"></div>
+    <div th:replace="~{fragments/header/__${headerTemplate}__ :: header(config=${headerConfig})}"></div>
 
     <main>
         <th:block th:each="block : ${pageContents}">
@@ -17,7 +17,7 @@
         </th:block>
     </main>
 
-    <div th:replace="~{fragments/footer/__${footerTemplate}__ :: footer}"></div>
+    <div th:replace="~{fragments/footer/__${footerTemplate}__ :: footer(config=${footerConfig})}"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>

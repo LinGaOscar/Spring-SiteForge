@@ -40,6 +40,8 @@ public class PreviewController {
         model.addAttribute("headerTemplate", resolveKey(page.getLayoutSet(), "header"));
         model.addAttribute("footerTemplate", resolveKey(page.getLayoutSet(), "footer"));
         model.addAttribute("isPreview", true);
+        model.addAttribute("headerConfig", java.util.Collections.emptyMap());
+        model.addAttribute("footerConfig", java.util.Collections.emptyMap());
         return "layout/base";
     }
 

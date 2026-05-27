@@ -1,5 +1,7 @@
 package com.siteforge.web.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siteforge.domain.entity.LayoutSet;
 import com.siteforge.domain.entity.Page;
 import com.siteforge.domain.enums.TemplateKey;
@@ -7,19 +9,24 @@ import com.siteforge.web.service.PageContentView;
 import com.siteforge.web.service.PageRenderService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class PageController {
 
     private final PageRenderService pageRenderService;
+    private final ObjectMapper objectMapper;
 
     @Value("${portal.site-id}")
     private Long siteId;
@@ -29,7 +36,6 @@ public class PageController {
         return renderPage("/", request, model);
     }
 
-    // {*path} 捕捉任意深度路徑，例如 /about/team → path = "/about/team"
     @GetMapping("/{*path}")
     public String page(@PathVariable String path, HttpServletRequest request, Model model) {
         return renderPage(path, request, model);
@@ -37,12 +43,9 @@ public class PageController {
 
     private String renderPage(String path, HttpServletRequest request, Model model) {
         boolean isMobile = Boolean.TRUE.equals(request.getAttribute("isMobile"));
-
-        // 路徑不存在或未發布 → 回首頁
         return pageRenderService.findPublishedPage(siteId, path)
                 .map(page -> {
                     List<PageContentView> contents = pageRenderService.buildContentViews(page.getId());
-                    // RWS 頁面（手機限定活動頁）不允許桌面裝置開啟
                     if (!isMobile && isRwsPage(page.getLayoutSet(), contents)) {
                         return "redirect:/mobile-required";
                     }
@@ -57,7 +60,19 @@ public class PageController {
         model.addAttribute("pageContents", contents);
         model.addAttribute("headerTemplate", resolveKey(page.getLayoutSet(), "header"));
         model.addAttribute("footerTemplate", resolveKey(page.getLayoutSet(), "footer"));
+        model.addAttribute("headerConfig", parseConfig(page.getHeaderConfigJson()));
+        model.addAttribute("footerConfig", parseConfig(page.getFooterConfigJson()));
         return "layout/base";
+    }
+
+    private Map<String, Object> parseConfig(String json) {
+        if (json == null || json.isBlank()) return Collections.emptyMap();
+        try {
+            return objectMapper.readValue(json, new TypeReference<>() {});
+        } catch (Exception e) {
+            log.warn("無法解析 config JSON: {}", e.getMessage());
+            return Collections.emptyMap();
+        }
     }
 
     // RWS 頁面判定：header/footer key 或任一 body block key 以 RWS_ 開頭
