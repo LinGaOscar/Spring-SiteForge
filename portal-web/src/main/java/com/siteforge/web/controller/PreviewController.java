@@ -3,6 +3,7 @@ package com.siteforge.web.controller;
 import com.siteforge.domain.entity.LayoutSet;
 import com.siteforge.domain.entity.Page;
 import com.siteforge.domain.enums.TemplateKey;
+import com.siteforge.domain.repository.ComponentDefinitionRepository;
 import com.siteforge.domain.repository.PageRepository;
 import com.siteforge.web.service.PageContentView;
 import com.siteforge.web.service.PageRenderService;
@@ -25,6 +26,7 @@ public class PreviewController {
 
     private final PageRepository pageRepository;
     private final PageRenderService pageRenderService;
+    private final ComponentDefinitionRepository componentDefinitionRepository;
 
     @GetMapping("/preview/{pageId}")
     public String preview(@PathVariable Long pageId, Model model) {
@@ -39,6 +41,15 @@ public class PreviewController {
         model.addAttribute("footerTemplate", resolveKey(page.getLayoutSet(), "footer"));
         model.addAttribute("isPreview", true);
         return "layout/base";
+    }
+
+    @GetMapping("/preview/component/{key}")
+    public String previewComponent(@PathVariable String key, Model model) {
+        if (!componentDefinitionRepository.existsByKeyAndTypeAndActiveTrue(key, "BODY")) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Component not found: " + key);
+        }
+        model.addAttribute("componentKey", key);
+        return "preview/component";
     }
 
     private String resolveKey(LayoutSet layoutSet, String part) {
