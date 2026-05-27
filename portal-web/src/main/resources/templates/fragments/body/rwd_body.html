@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<div th:fragment="body">
+<div th:fragment="body(config)">
 
     <!-- DB 內容區塊（有 pageContents 時渲染） -->
     <div th:if="${pageContents != null and !pageContents.isEmpty()}">

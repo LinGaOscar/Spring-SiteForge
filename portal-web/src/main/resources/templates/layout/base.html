@@ -13,7 +13,7 @@
 
     <main>
         <th:block th:each="block : ${pageContents}">
-            <div th:replace="~{fragments/body/__${block.blockKey}__ :: body}"></div>
+            <div th:replace="~{fragments/body/__${block.blockKey}__ :: body(config=${block.contentMap})}"></div>
         </th:block>
     </main>
 
