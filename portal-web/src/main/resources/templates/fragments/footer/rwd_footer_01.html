@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
+<!--@component-schema
+{
+  "deviceMode": "RWD",
+  "fields": [
+    {"name": "brand",     "type": "text",  "label": "品牌名稱", "default": "SpringSiteForge"},
+    {"name": "copyright", "type": "text",  "label": "版權文字", "default": "SpringSiteForge"},
+    {"name": "navLinks",  "type": "links", "label": "快速連結", "default": []}
+  ]
+}
+@end-component-schema-->
 <footer th:fragment="footer(config)" class="bg-dark text-light pt-5 pb-3 mt-auto">
     <div class="container">
         <div class="row g-4 mb-4">

@@ -18,12 +18,18 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ComponentSyncRunner implements ApplicationRunner {
+
+    private static final Pattern SCHEMA_PATTERN = Pattern.compile(
+            "<!--@component-schema\\s*(\\{.*?\\})\\s*@end-component-schema-->",
+            Pattern.DOTALL);
 
     private final ComponentDefinitionRepository componentDefinitionRepository;
     private final ResourcePatternResolver resourcePatternResolver;
@@ -52,8 +58,9 @@ public class ComponentSyncRunner implements ApplicationRunner {
                     componentDefinitionRepository.save(cd);
                 });
 
-        // 新增或重新啟用，並讀取 schema JSON
-        for (String key : found) {
+        // 新增或重新啟用，並從 HTML 注釋讀取 schema
+        for (Resource resource : resources) {
+            String key = resource.getFilename().replace(".html", "");
             ComponentDefinition cd = componentDefinitionRepository.findById(key)
                     .orElseGet(() -> {
                         ComponentDefinition c = new ComponentDefinition();
@@ -63,28 +70,28 @@ public class ComponentSyncRunner implements ApplicationRunner {
             cd.setType(type);
             cd.setActive(true);
             cd.setSyncedAt(LocalDateTime.now());
-            loadSchema(cd, key);
+            loadSchema(cd, resource);
             componentDefinitionRepository.save(cd);
         }
 
         log.info("元件同步完成 [{}]: {} 個 active", type, found.size());
     }
 
-    private void loadSchema(ComponentDefinition cd, String key) {
+    private void loadSchema(ComponentDefinition cd, Resource resource) {
         try {
-            Resource schemaResource = resourcePatternResolver.getResource(
-                    "classpath:component-schemas/" + key + ".json");
-            if (!schemaResource.exists()) {
+            String html = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            Matcher matcher = SCHEMA_PATTERN.matcher(html);
+            if (!matcher.find()) {
                 cd.setDeviceMode("RWD");
                 return;
             }
-            String rawJson = new String(schemaResource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            String rawJson = matcher.group(1).trim();
             cd.setSchemaJson(rawJson);
             Map<String, Object> schemaMap = objectMapper.readValue(rawJson, new TypeReference<>() {});
             Object dm = schemaMap.get("deviceMode");
             cd.setDeviceMode(dm instanceof String s ? s : "RWD");
         } catch (Exception e) {
-            log.warn("無法讀取元件 schema [{}]: {}", key, e.getMessage());
+            log.warn("無法解析元件 schema [{}]: {}", cd.getKey(), e.getMessage());
             cd.setDeviceMode("RWD");
         }
     }

@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
+<!--@component-schema
+{
+  "deviceMode": "RWD",
+  "fields": [
+    {"name": "logoText", "type": "text", "label": "Logo 文字", "default": "SpringSiteForge"},
+    {"name": "navLinks", "type": "links", "label": "選單連結", "default": []}
+  ]
+}
+@end-component-schema-->
 <header th:fragment="header(config)">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
         <div class="container">

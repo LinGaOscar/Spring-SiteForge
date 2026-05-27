@@ -14,12 +14,12 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
-import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,32 +31,36 @@ class ComponentSyncRunnerTest {
 
     @BeforeEach
     void injectObjectMapper() throws Exception {
-        Field field = ComponentSyncRunner.class.getDeclaredField("objectMapper");
+        var field = ComponentSyncRunner.class.getDeclaredField("objectMapper");
         field.setAccessible(true);
         field.set(componentSyncRunner, new ObjectMapper());
     }
 
     @Test
-    void run_bodyFragment_savedWithDeviceModeFromSchema() throws Exception {
-        Resource htmlResource = mock(Resource.class);
-        when(htmlResource.getFilename()).thenReturn("rwd_body_01.html");
+    void run_rwdFragment_parsesSchemaFromHtmlComment() throws Exception {
+        String html = """
+                <!DOCTYPE html>
+                <html xmlns:th="http://www.thymeleaf.org">
+                <body>
+                <!--@component-schema
+                {"deviceMode":"RWD","fields":[{"name":"logoText","type":"text","label":"Logo","default":"SF"}]}
+                @end-component-schema-->
+                <div th:fragment="header(config)"></div>
+                </body>
+                </html>
+                """;
+        Resource htmlResource = new ByteArrayResource(html.getBytes()) {
+            @Override public String getFilename() { return "rwd_header.html"; }
+        };
         when(resourcePatternResolver.getResources("classpath:templates/fragments/body/*.html"))
-                .thenReturn(new Resource[]{htmlResource});
-        when(resourcePatternResolver.getResources("classpath:templates/fragments/header/*.html"))
                 .thenReturn(new Resource[0]);
+        when(resourcePatternResolver.getResources("classpath:templates/fragments/header/*.html"))
+                .thenReturn(new Resource[]{htmlResource});
         when(resourcePatternResolver.getResources("classpath:templates/fragments/footer/*.html"))
                 .thenReturn(new Resource[0]);
-
-        String schema = "{\"deviceMode\":\"RWD\",\"fields\":[]}";
-        Resource schemaResource = new ByteArrayResource(schema.getBytes()) {
-            @Override public boolean exists() { return true; }
-        };
-        when(resourcePatternResolver.getResource("classpath:component-schemas/rwd_body_01.json"))
-                .thenReturn(schemaResource);
-
         when(componentDefinitionRepository.findByTypeAndActiveTrue(anyString()))
                 .thenReturn(Collections.emptyList());
-        when(componentDefinitionRepository.findById("rwd_body_01"))
+        when(componentDefinitionRepository.findById("rwd_header"))
                 .thenReturn(Optional.empty());
         when(componentDefinitionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -64,36 +68,38 @@ class ComponentSyncRunnerTest {
 
         ArgumentCaptor<ComponentDefinition> captor = ArgumentCaptor.forClass(ComponentDefinition.class);
         verify(componentDefinitionRepository, atLeastOnce()).save(captor.capture());
-
         ComponentDefinition saved = captor.getAllValues().stream()
-                .filter(cd -> "rwd_body_01".equals(cd.getKey()))
+                .filter(cd -> "rwd_header".equals(cd.getKey()))
                 .findFirst().orElseThrow();
         assertThat(saved.getDeviceMode()).isEqualTo("RWD");
-        assertThat(saved.getSchemaJson()).contains("deviceMode");
-        assertThat(saved.getType()).isEqualTo("BODY");
+        assertThat(saved.getSchemaJson()).contains("logoText");
     }
 
     @Test
-    void run_rwsFragment_hasRwsDeviceMode() throws Exception {
-        Resource htmlResource = mock(Resource.class);
-        when(htmlResource.getFilename()).thenReturn("rws_body.html");
+    void run_rwsFragment_parsesDeviceModeRws() throws Exception {
+        String html = """
+                <!DOCTYPE html>
+                <html xmlns:th="http://www.thymeleaf.org">
+                <body>
+                <!--@component-schema
+                {"deviceMode":"RWS","fields":[]}
+                @end-component-schema-->
+                <div th:fragment="body(config)"></div>
+                </body>
+                </html>
+                """;
+        Resource htmlResource = new ByteArrayResource(html.getBytes()) {
+            @Override public String getFilename() { return "body_only_mobile.html"; }
+        };
         when(resourcePatternResolver.getResources("classpath:templates/fragments/body/*.html"))
                 .thenReturn(new Resource[]{htmlResource});
         when(resourcePatternResolver.getResources("classpath:templates/fragments/header/*.html"))
                 .thenReturn(new Resource[0]);
         when(resourcePatternResolver.getResources("classpath:templates/fragments/footer/*.html"))
                 .thenReturn(new Resource[0]);
-
-        String schema = "{\"deviceMode\":\"RWS\",\"fields\":[]}";
-        Resource schemaResource = new ByteArrayResource(schema.getBytes()) {
-            @Override public boolean exists() { return true; }
-        };
-        when(resourcePatternResolver.getResource("classpath:component-schemas/rws_body.json"))
-                .thenReturn(schemaResource);
-
         when(componentDefinitionRepository.findByTypeAndActiveTrue(anyString()))
                 .thenReturn(Collections.emptyList());
-        when(componentDefinitionRepository.findById("rws_body"))
+        when(componentDefinitionRepository.findById("body_only_mobile"))
                 .thenReturn(Optional.empty());
         when(componentDefinitionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -101,10 +107,45 @@ class ComponentSyncRunnerTest {
 
         ArgumentCaptor<ComponentDefinition> captor = ArgumentCaptor.forClass(ComponentDefinition.class);
         verify(componentDefinitionRepository, atLeastOnce()).save(captor.capture());
-
         ComponentDefinition saved = captor.getAllValues().stream()
-                .filter(cd -> "rws_body".equals(cd.getKey()))
+                .filter(cd -> "body_only_mobile".equals(cd.getKey()))
                 .findFirst().orElseThrow();
         assertThat(saved.getDeviceMode()).isEqualTo("RWS");
+    }
+
+    @Test
+    void run_fragmentWithoutSchemaComment_defaultsToRwd() throws Exception {
+        String html = """
+                <!DOCTYPE html>
+                <html xmlns:th="http://www.thymeleaf.org">
+                <body>
+                <div th:fragment="body(config)"><p>no schema comment</p></div>
+                </body>
+                </html>
+                """;
+        Resource htmlResource = new ByteArrayResource(html.getBytes()) {
+            @Override public String getFilename() { return "rwd_body.html"; }
+        };
+        when(resourcePatternResolver.getResources("classpath:templates/fragments/body/*.html"))
+                .thenReturn(new Resource[]{htmlResource});
+        when(resourcePatternResolver.getResources("classpath:templates/fragments/header/*.html"))
+                .thenReturn(new Resource[0]);
+        when(resourcePatternResolver.getResources("classpath:templates/fragments/footer/*.html"))
+                .thenReturn(new Resource[0]);
+        when(componentDefinitionRepository.findByTypeAndActiveTrue(anyString()))
+                .thenReturn(Collections.emptyList());
+        when(componentDefinitionRepository.findById("rwd_body"))
+                .thenReturn(Optional.empty());
+        when(componentDefinitionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        componentSyncRunner.run(null);
+
+        ArgumentCaptor<ComponentDefinition> captor = ArgumentCaptor.forClass(ComponentDefinition.class);
+        verify(componentDefinitionRepository, atLeastOnce()).save(captor.capture());
+        ComponentDefinition saved = captor.getAllValues().stream()
+                .filter(cd -> "rwd_body".equals(cd.getKey()))
+                .findFirst().orElseThrow();
+        assertThat(saved.getDeviceMode()).isEqualTo("RWD");
+        assertThat(saved.getSchemaJson()).isNull();
     }
 }
