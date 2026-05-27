@@ -38,6 +38,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" th:href="@{/cms/components}"
+                   th:classappend="${currentUri.contains('/components')} ? 'active'">
+                    🧩 元件管理
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" th:href="@{/cms/assets}"
                    th:classappend="${currentUri.contains('/assets')} ? 'active'">
                     🖼 素材管理
