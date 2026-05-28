@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/cms/pages/{pageId}/contents")
+@RequestMapping("/api/pages/{pageId}/contents")
 @RequiredArgsConstructor
 public class PageContentController {
 

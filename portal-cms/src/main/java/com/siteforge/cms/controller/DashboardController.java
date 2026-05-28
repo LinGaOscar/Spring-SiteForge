@@ -22,7 +22,7 @@ public class DashboardController {
     private final CmsUserService cmsUserService;
     private final PageRepository pageRepository;
 
-    @GetMapping("/cms/dashboard")
+    @GetMapping("/dashboard")
     public String dashboard(@AuthenticationPrincipal UserDetails ud, Model model) {
         CmsUser actor = cmsUserService.loadUser(ud.getUsername());
         String unitCode = cmsUserService.unitCode(actor);

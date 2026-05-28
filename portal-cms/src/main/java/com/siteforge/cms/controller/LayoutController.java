@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/cms/layouts")
+@RequestMapping("/api/layouts")
 @RequiredArgsConstructor
 public class LayoutController {
 

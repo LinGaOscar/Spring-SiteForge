@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/cms/pages/{pageId}")
+@RequestMapping("/api/pages/{pageId}")
 @RequiredArgsConstructor
 public class PublishController {
 

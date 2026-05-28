@@ -10,6 +10,8 @@ spring:
 
 server:
   port: 8200
+  servlet:
+    context-path: /cws
 
 storage:
   upload-dir: ./uploads

@@ -6,7 +6,7 @@
 <body>
 <main>
     <div class="d-flex align-items-center mb-4 gap-3">
-        <a th:href="@{/cms/pages}" class="btn btn-sm btn-outline-secondary">← 返回</a>
+        <a th:href="@{/pages}" class="btn btn-sm btn-outline-secondary">← 返回</a>
         <h5 class="fw-bold mb-0" th:text="${page?.id == null ? '新增頁面' : '編輯頁面：' + page.title}">頁面</h5>
     </div>
 
@@ -16,7 +16,7 @@
         <div class="col-lg-7">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
-                    <form th:action="${page?.id == null ? '/cms/pages' : '/cms/pages/' + page.id}"
+                    <form th:action="${page?.id == null ? '/pages' : '/pages/' + page.id}"
                           method="post">
 
                         <h6 class="fw-semibold mb-3">基本資訊</h6>
@@ -81,7 +81,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <span th:text="${page?.id == null ? '建立（草稿）' : '儲存'}">送出</span>
                             </button>
-                            <a th:href="@{/cms/pages}" class="btn btn-outline-secondary">取消</a>
+                            <a th:href="@{/pages}" class="btn btn-outline-secondary">取消</a>
                             <button th:if="${page?.id != null and previewBaseUrl != null and !#strings.isEmpty(previewBaseUrl)}"
                                     type="button" class="btn btn-outline-info ms-auto"
                                     data-bs-toggle="modal" data-bs-target="#previewModal">
@@ -126,7 +126,7 @@
                          class="d-flex align-items-center gap-2 p-2 mb-1 border rounded bg-light">
                         <span class="badge bg-secondary" th:text="${stat.index + 1}">1</span>
                         <span class="small font-monospace flex-grow-1" th:text="${c.blockKey}">rwd_body_01</span>
-                        <form th:action="@{/cms/pages/{pid}/content/{cid}/delete(pid=${page.id},cid=${c.id})}"
+                        <form th:action="@{/pages/{pid}/content/{cid}/delete(pid=${page.id},cid=${c.id})}"
                               method="post"
                               onsubmit="return confirm('移除此區塊？')">
                             <button class="btn btn-xs btn-outline-danger btn-sm py-0 px-1">✕</button>
@@ -136,7 +136,7 @@
                     <hr class="my-3">
 
                     <!-- 新增 Body 區塊 -->
-                    <form th:action="@{/cms/pages/{pid}/content(pid=${page.id})}" method="post">
+                    <form th:action="@{/pages/{pid}/content(pid=${page.id})}" method="post">
                         <label class="form-label small fw-semibold">新增 Body 模板</label>
                         <!-- portal-web 尚未啟動掃描時，bodyKeys 為空，提示使用者 -->
                         <div th:if="${bodyKeys == null or #lists.isEmpty(bodyKeys)}"

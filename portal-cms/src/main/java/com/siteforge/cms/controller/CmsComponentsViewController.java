@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/cms/components")
+@RequestMapping("/components")
 @RequiredArgsConstructor
 public class CmsComponentsViewController {
 

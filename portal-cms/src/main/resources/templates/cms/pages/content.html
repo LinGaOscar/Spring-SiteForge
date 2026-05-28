@@ -5,7 +5,7 @@
 <body>
 <main>
     <div class="d-flex align-items-center mb-4 gap-3">
-        <a th:href="@{/cms/pages/{id}/edit(id=${page.id})}" class="btn btn-sm btn-outline-secondary">← 返回</a>
+        <a th:href="@{/pages/{id}/edit(id=${page.id})}" class="btn btn-sm btn-outline-secondary">← 返回</a>
         <div>
             <h5 class="fw-bold mb-0">內容區塊管理</h5>
             <div class="small text-muted" th:text="${page.title} + ' (' + ${page.path} + ')'"></div>
@@ -35,7 +35,7 @@
                         <button class="btn btn-sm btn-outline-primary py-0"
                                 data-bs-toggle="collapse"
                                 th:data-bs-target="'#edit-' + ${c.id}">編輯</button>
-                        <form th:action="@{/cms/pages/{pid}/content/{cid}/delete(pid=${page.id},cid=${c.id})}"
+                        <form th:action="@{/pages/{pid}/content/{cid}/delete(pid=${page.id},cid=${c.id})}"
                               method="post"
                               onsubmit="return confirm('確定刪除此區塊？')">
                             <button class="btn btn-sm btn-outline-danger py-0">刪除</button>
@@ -44,7 +44,7 @@
                 </div>
 
                 <div class="collapse mt-3" th:id="'edit-' + ${c.id}">
-                    <form th:action="@{/cms/pages/{pid}/content/{cid}(pid=${page.id},cid=${c.id})}"
+                    <form th:action="@{/pages/{pid}/content/{cid}(pid=${page.id},cid=${c.id})}"
                           method="post">
                         <div class="row g-2 mb-2">
                             <div class="col-md-5">
@@ -84,7 +84,7 @@
     <div class="card border-0 shadow-sm" style="max-width:760px">
         <div class="card-header bg-white fw-semibold small py-2">新增區塊</div>
         <div class="card-body p-4">
-            <form th:action="@{/cms/pages/{pid}/content(pid=${page.id})}" method="post">
+            <form th:action="@{/pages/{pid}/content(pid=${page.id})}" method="post">
                 <div class="row g-2 mb-2">
                     <div class="col-md-5">
                         <label class="form-label small fw-semibold">Block Key <span class="text-danger">*</span></label>

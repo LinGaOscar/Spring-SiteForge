@@ -35,15 +35,15 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
-                .loginPage("/cms/auth/login")
-                .loginProcessingUrl("/cms/auth/login")
-                .defaultSuccessUrl("/cms/dashboard", true)
-                .failureUrl("/cms/auth/login?error")
+                .loginPage("/auth/login")
+                .loginProcessingUrl("/auth/login")
+                .defaultSuccessUrl("/dashboard", true)
+                .failureUrl("/auth/login?error")
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutUrl("/cms/auth/logout")
-                .logoutSuccessUrl("/cms/auth/login?logout")
+                .logoutUrl("/auth/logout")
+                .logoutSuccessUrl("/auth/login?logout")
                 .permitAll()
             )
             .authenticationProvider(authenticationProvider());

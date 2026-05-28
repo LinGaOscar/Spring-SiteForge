@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/cms/pages/{pageId}/content")
+@RequestMapping("/pages/{pageId}/content")
 @RequiredArgsConstructor
 public class CmsPageContentViewController {
 

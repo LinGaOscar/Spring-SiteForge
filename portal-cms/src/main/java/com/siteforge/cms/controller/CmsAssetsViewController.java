@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/cms/assets")
+@RequestMapping("/assets")
 @RequiredArgsConstructor
 public class CmsAssetsViewController {
 

@@ -26,25 +26,25 @@
         </div>
         <ul class="nav flex-column gap-1 flex-grow-1">
             <li class="nav-item">
-                <a class="nav-link" th:href="@{/cms/dashboard}"
+                <a class="nav-link" th:href="@{/dashboard}"
                    th:classappend="${currentUri.contains('/dashboard')} ? 'active'">
                     📊 Dashboard
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:href="@{/cms/pages}"
+                <a class="nav-link" th:href="@{/pages}"
                    th:classappend="${currentUri.contains('/pages')} ? 'active'">
                     📄 頁面管理
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:href="@{/cms/components}"
+                <a class="nav-link" th:href="@{/components}"
                    th:classappend="${currentUri.contains('/components')} ? 'active'">
                     🧩 元件管理
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:href="@{/cms/assets}"
+                <a class="nav-link" th:href="@{/assets}"
                    th:classappend="${currentUri.contains('/assets')} ? 'active'">
                     🖼 素材管理
                 </a>
@@ -54,7 +54,7 @@
             <div class="text-white-50 small mb-1" sec:authentication="name">user</div>
             <div class="text-white-50 small mb-2"
                  th:text="${actor?.unit?.name ?: '—'}">單位</div>
-            <form th:action="@{/cms/auth/logout}" method="post">
+            <form th:action="@{/auth/logout}" method="post">
                 <button class="btn btn-sm btn-outline-secondary w-100 text-white-50">登出</button>
             </form>
         </div>

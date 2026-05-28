@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/cms/pages")
+@RequestMapping("/api/pages")
 @RequiredArgsConstructor
 public class PageController {
 

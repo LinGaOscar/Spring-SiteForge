@@ -56,7 +56,7 @@
                     <div class="d-flex gap-2">
                         <span class="text-muted small"
                               th:text="${p.submittedBy} + ' · ' + ${p.submittedAt != null ? #temporals.format(p.submittedAt,'MM/dd HH:mm') : '—'}"></span>
-                        <a th:href="@{/cms/pages(status=${p.status.name()})}"
+                        <a th:href="@{/pages(status=${p.status.name()})}"
                            class="btn btn-sm btn-outline-primary">查看</a>
                     </div>
                 </div>

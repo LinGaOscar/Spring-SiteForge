@@ -46,7 +46,7 @@
                         </a>
                         <!-- 刪除（同單位 OP/MA） -->
                         <form th:if="${(isOP or isMA) and unitCode == asset.unit?.code}"
-                              th:action="@{/cms/assets/{id}/delete(id=${asset.id})}"
+                              th:action="@{/assets/{id}/delete(id=${asset.id})}"
                               method="post"
                               onsubmit="return confirm('確定刪除此素材？')">
                             <button class="btn btn-sm btn-outline-danger py-0">✕</button>
@@ -70,7 +70,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form th:action="@{/cms/assets/upload}" method="post"
+                    <form th:action="@{/assets/upload}" method="post"
                           enctype="multipart/form-data">
                         <div class="mb-3">
                             <label class="form-label small fw-semibold">選擇檔案</label>

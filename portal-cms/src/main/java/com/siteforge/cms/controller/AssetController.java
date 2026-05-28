@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/cms/assets")
+@RequestMapping("/api/assets")
 @RequiredArgsConstructor
 public class AssetController {
 
