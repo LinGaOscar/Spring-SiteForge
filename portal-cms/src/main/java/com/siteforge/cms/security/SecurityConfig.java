@@ -30,8 +30,8 @@ public class SecurityConfig {
                 .ignoringRequestMatchers("/api/**")
             )
             .authorizeHttpRequests(auth -> auth
-                // 登入頁、靜態資源、錯誤頁對外開放
-                .requestMatchers("/css/**", "/js/**", "/error").permitAll()
+                // 登入頁、靜態資源、錯誤頁、上傳素材對外開放
+                .requestMatchers("/css/**", "/js/**", "/error", "/uploads/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
