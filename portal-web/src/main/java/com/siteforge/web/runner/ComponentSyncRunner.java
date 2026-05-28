@@ -45,7 +45,9 @@ public class ComponentSyncRunner implements ApplicationRunner {
 
     private void syncType(String type, String pattern) throws Exception {
         Resource[] resources = resourcePatternResolver.getResources(pattern);
+        // JAR 環境下 getFilename() 可能回傳 null，需先過濾
         Set<String> found = Arrays.stream(resources)
+                .filter(r -> r.getFilename() != null)
                 .map(r -> r.getFilename().replace(".html", ""))
                 .collect(Collectors.toSet());
 
@@ -60,6 +62,7 @@ public class ComponentSyncRunner implements ApplicationRunner {
 
         // 新增或重新啟用，並從 HTML 注釋讀取 schema
         for (Resource resource : resources) {
+            if (resource.getFilename() == null) continue; // JAR 環境防護
             String key = resource.getFilename().replace(".html", "");
             ComponentDefinition cd = componentDefinitionRepository.findById(key)
                     .orElseGet(() -> {
