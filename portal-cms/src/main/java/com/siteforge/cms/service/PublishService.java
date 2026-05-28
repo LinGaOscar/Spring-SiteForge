@@ -32,6 +32,10 @@ public class PublishService {
     public PageVersionResponse publish(Long pageId, String username) {
         Page page = pageRepository.findById(pageId)
             .orElseThrow(() -> new IllegalArgumentException("Page not found: " + pageId));
+        // 只允許在 MA 放行後（PENDING_PUBLISH）進入 PUBLISHED，防止越權繞過工作流
+        if (page.getStatus() != PageStatus.PENDING_PUBLISH) {
+            throw new IllegalStateException("頁面狀態不允許直接發布：" + page.getStatus());
+        }
 
         List<PageContent> contents = pageContentRepository.findByPageIdOrderBySortOrder(pageId);
         int nextVersionNo = pageVersionRepository.findMaxVersionNoByPageId(pageId).orElse(0) + 1;
