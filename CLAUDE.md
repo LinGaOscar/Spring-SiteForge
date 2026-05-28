@@ -14,28 +14,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 兩個 Spring Boot 應用共用同一個 PostgreSQL 資料庫，透過 `portal-domain` 存取。
 
-## 常用指令
+## 開發環境啟動流程
 
 ```bash
-# 初始化（首次 clone 或 CI）
-./mvnw install -DskipTests
-
-# 啟動基礎設施（PostgreSQL + Redis），首次啟動自動執行 db/init/*.sql
+# 1. 建立 DB（首次，自動執行 db/init/*.sql）
 docker compose up -d
 
-# 啟動應用（建議先啟動 portal-web，ComponentSyncRunner 完成 fragment 掃描後 CMS 元件選單才有資料）
-./mvnw spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
-./mvnw spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
-
-# 編譯（不啟動）
-./mvnw compile -pl portal-domain,portal-cms -am
-
-# 執行測試（commit 前必跑全套）
-./mvnw test -pl portal-web,portal-cms,portal-domain
-./mvnw test -pl portal-cms -Dtest=LocalStorageServiceTest  # 單一測試類
-
-# 重置 DB（清除所有資料，重新執行 init SQL）
+# 2. 重置 DB（清除所有資料重來）
 docker compose down -v && docker compose up -d
+
+# 3. Maven install（首次或 portal-domain 有異動時）
+./mvnw install -DskipTests
+
+# 4. 啟動應用（portal-web 先啟動，ComponentSyncRunner 掃描完元件後 CMS 選單才有資料）
+./mvnw spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev   # http://localhost:8100
+./mvnw spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev   # http://localhost:8200/cms/
+
+# 5. 測試（commit 前必跑全套）
+./mvnw test -pl portal-web,portal-cms,portal-domain
+./mvnw test -pl portal-cms -Dtest=LocalStorageServiceTest               # 單一測試類
 ```
 
 ## 架構核心原則
@@ -233,4 +230,6 @@ GET /preview/{pageId}         dev 環境：渲染任意 page（含未發布）�
 - `CmsUserService.loadUser(username)` 是所有 CMS controller 取得當前使用者（含 unit）的共用入口。
 - 新增 TemplateKey 值時必須同步建立對應的 HTML fragment 檔案，否則 Thymeleaf 渲染會拋例外。
 - 新增 fragment 後**不需要**手動建任何 JSON 檔，schema 內嵌在 HTML 注釋中，重啟 portal-web 即自動同步。
+- `cms.preview-base-url` 僅設定於 `application-dev.yml`，正式環境不存在 → CMS 的「↗ 預覽」按鈕與元件 iframe 為 dev only 功能。
+- `GlobalModelAdvice` 替所有 CMS Thymeleaf template 注入 `currentUri`（當前請求 URI），供 sidebar 高亮判斷使用。
 - SSO 登入為預留介面，目前僅實作帳密登入。
