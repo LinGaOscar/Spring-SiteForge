@@ -55,6 +55,7 @@ public class CmsPagesViewController {
         model.addAttribute("statuses", PageStatus.values());
         model.addAttribute("isMA", actor.getRoles().contains(CmsUserRole.MA));
         model.addAttribute("isOP", actor.getRoles().contains(CmsUserRole.OP));
+        model.addAttribute("previewBaseUrl", previewBaseUrl);
         return "cms/pages/list";
     }
 
