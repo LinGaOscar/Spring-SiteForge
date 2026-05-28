@@ -6,97 +6,8 @@
 @end-component-schema-->
 <div th:fragment="body(config)">
 
-    <!-- DB 內容區塊（有 pageContents 時渲染） -->
-    <div th:if="${pageContents != null and !pageContents.isEmpty()}">
-        <div th:each="block : ${pageContents}">
-
-            <section th:if="${block.blockKey == 'hero'}" class="py-5 bg-light">
-                <div class="container py-3">
-                    <div class="row align-items-center g-5">
-                        <div class="col-lg-6">
-                            <h1 class="display-5 fw-bold lh-1 mb-3"
-                                th:text="${block.contentMap?.title ?: page?.title}">標題</h1>
-                            <p class="fs-5 text-muted mb-4"
-                               th:text="${block.contentMap?.subtitle}"></p>
-                            <div class="d-flex gap-3 flex-wrap">
-                                <a th:if="${block.contentMap?.ctaUrl}"
-                                   th:href="${block.contentMap.ctaUrl}"
-                                   class="btn btn-primary btn-lg"
-                                   th:text="${block.contentMap?.ctaText ?: '了解更多'}">了解更多</a>
-                                <a th:if="${block.contentMap?.secondaryUrl}"
-                                   th:href="${block.contentMap.secondaryUrl}"
-                                   class="btn btn-outline-secondary btn-lg"
-                                   th:text="${block.contentMap?.secondaryText ?: '聯絡我們'}">聯絡我們</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section th:if="${block.blockKey == 'content'}" class="py-5">
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="col-lg-8">
-                            <h2 th:if="${block.contentMap?.title}"
-                                class="mb-4" th:text="${block.contentMap.title}"></h2>
-                            <div th:if="${block.contentMap?.html}"
-                                 th:utext="${block.contentMap.html}"></div>
-                            <p th:if="${block.contentMap?.text}"
-                               class="lead text-muted" th:text="${block.contentMap.text}"></p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section th:if="${block.blockKey == 'features'}" class="py-5 bg-light">
-                <div class="container">
-                    <h2 th:if="${block.contentMap?.title}"
-                        class="text-center mb-2" th:text="${block.contentMap.title}"></h2>
-                    <p th:if="${block.contentMap?.subtitle}"
-                       class="text-center text-muted mb-5" th:text="${block.contentMap.subtitle}"></p>
-                    <div class="row g-4 row-cols-1 row-cols-md-3">
-                        <div class="col" th:each="item : ${block.contentMap?.items}">
-                            <div class="card h-100 border-0 shadow-sm p-2">
-                                <div class="card-body">
-                                    <div class="fs-2 mb-2" th:text="${item.icon}"></div>
-                                    <h5 class="card-title" th:text="${item.title}"></h5>
-                                    <p class="card-text text-muted" th:text="${item.desc}"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section th:if="${block.blockKey == 'stats'}" class="py-4 bg-dark text-white">
-                <div class="container">
-                    <div class="row text-center g-4">
-                        <div class="col-6 col-md-3" th:each="s : ${block.contentMap?.items}">
-                            <div class="fs-2 fw-bold text-primary" th:text="${s.value}"></div>
-                            <div class="small text-white-50" th:text="${s.label}"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section th:if="${block.blockKey == 'cta'}" class="py-5 text-center">
-                <div class="container">
-                    <h2 th:if="${block.contentMap?.title}"
-                        class="mb-3" th:text="${block.contentMap.title}"></h2>
-                    <p th:if="${block.contentMap?.subtitle}"
-                       class="text-muted mb-4" th:text="${block.contentMap.subtitle}"></p>
-                    <a th:if="${block.contentMap?.ctaUrl}"
-                       th:href="${block.contentMap.ctaUrl}"
-                       class="btn btn-primary btn-lg px-5"
-                       th:text="${block.contentMap?.ctaText ?: '立即開始'}">立即開始</a>
-                </div>
-            </section>
-
-        </div>
-    </div>
-
-    <!-- 範例頁面（無 DB 內容時顯示，供版面確認使用） -->
-    <div th:if="${pageContents == null or pageContents.isEmpty()}">
+    <!-- 靜態範例展示（此 fragment 為 rwd_body 元件佔位符，Plan 2 改為讀取 config 值渲染） -->
+    <div>
 
         <!-- Hero -->
         <section class="py-5 bg-light">
@@ -192,8 +103,7 @@
                 <a href="/contact" class="btn btn-primary btn-lg px-5">免費諮詢</a>
             </div>
         </section>
-
-    </div>
+</div>
 </div>
 </body>
 </html>
