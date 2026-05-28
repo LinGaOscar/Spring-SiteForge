@@ -8,6 +8,7 @@ import com.siteforge.domain.enums.TemplateKey;
 import com.siteforge.web.service.PageContentView;
 import com.siteforge.web.service.PageRenderService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,16 +33,18 @@ public class PageController {
     private Long siteId;
 
     @GetMapping("/")
-    public String index(HttpServletRequest request, Model model) {
-        return renderPage("/", request, model);
+    public String index(HttpServletRequest request, HttpServletResponse response, Model model) {
+        return renderPage("/", request, response, model);
     }
 
     @GetMapping("/{*path}")
-    public String page(@PathVariable String path, HttpServletRequest request, Model model) {
-        return renderPage(path, request, model);
+    public String page(@PathVariable String path, HttpServletRequest request,
+                       HttpServletResponse response, Model model) {
+        return renderPage(path, request, response, model);
     }
 
-    private String renderPage(String path, HttpServletRequest request, Model model) {
+    private String renderPage(String path, HttpServletRequest request,
+                              HttpServletResponse response, Model model) {
         boolean isMobile = Boolean.TRUE.equals(request.getAttribute("isMobile"));
         return pageRenderService.findPublishedPage(siteId, path)
                 .map(page -> {
@@ -51,7 +54,11 @@ public class PageController {
                     }
                     return buildModel(page, contents, model);
                 })
-                .orElse("redirect:/");
+                .orElseGet(() -> {
+                    // 找不到發布頁面時回傳 503，避免 redirect:/ 造成無限迴圈
+                    response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+                    return "error/404";
+                });
     }
 
     private String buildModel(Page page, List<PageContentView> contents, Model model) {
