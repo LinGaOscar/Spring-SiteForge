@@ -23,9 +23,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # 啟動基礎設施（PostgreSQL + Redis），首次啟動自動執行 db/init/*.sql
 docker compose up -d
 
-# 啟動應用
-./mvnw spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
+# 啟動應用（建議先啟動 portal-web，ComponentSyncRunner 完成 fragment 掃描後 CMS 元件選單才有資料）
 ./mvnw spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
+./mvnw spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
 
 # 編譯（不啟動）
 ./mvnw compile -pl portal-domain,portal-cms -am
@@ -139,6 +139,11 @@ POST /cms/pages/{id}/reject-publish      MA 退回發布
 POST /cms/pages/{id}/request-unpublish   OP 申請下架
 POST /cms/pages/{id}/confirm-unpublish   MA 確認下架
 POST /cms/pages/{id}/unpublish           MA 直接下架
+GET  /cms/components                        元件管理列表（component_definition，含 iframe 預覽）
+GET  /cms/pages/{id}/content               頁面 body 區塊管理（新增/編輯/刪除/排序）
+POST /cms/pages/{id}/content               新增 body block（block_key + sort_order + content_json）
+POST /cms/pages/{id}/content/{cid}        更新 body block content_json
+POST /cms/pages/{id}/content/{cid}/delete 刪除 body block
 GET  /cms/assets            素材管理（Grid 預覽，全單位可見）
 POST /cms/assets/upload     上傳（OP / MA 可操作）
 POST /cms/assets/{id}/delete 刪除（同單位 OP / MA 限定）
@@ -205,6 +210,19 @@ header/footer 同理，fragment 宣告改為 `th:fragment="header(config)"` / `t
 ### Step 4：portal-web 渲染
 
 `PageController` 從 DB 取出 `page_content` 組成 `List<PageContentView>`，各 block 的 `contentMap`（JSON 解析）傳入 fragment 的 `config` 參數。
+
+---
+
+## portal-web 其他路由
+
+```
+GET /mobile-required          桌面裝置開啟 RWS 頁面時的提示頁
+GET /switch-view              手動切換桌機/手機視圖（寫入 view_mode Cookie，redirect 回 Referer）
+GET /preview/component/{key}  dev 環境：依 block_key 渲染單一 body 元件預覽（BODY 類型限定）
+GET /preview/{pageId}         dev 環境：渲染任意 page（含未發布），headerConfig/footerConfig 為空 Map
+```
+
+素材靜態資源由 portal-cms 提供：`http://localhost:8200/uploads/**`，portal-web 的 template 直接引用此 URL。
 
 ---
 

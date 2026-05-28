@@ -6,8 +6,11 @@
 <main>
     <div class="d-flex align-items-center justify-content-between mb-4">
         <h5 class="fw-bold mb-0">頁面管理</h5>
-        <a th:if="${isOP}" th:href="@{/cms/pages/new}"
-           class="btn btn-primary btn-sm">+ 新增頁面</a>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm" onclick="window.location.reload()">↻ 重新整理</button>
+            <a th:if="${isOP}" th:href="@{/cms/pages/new}"
+               class="btn btn-primary btn-sm">+ 新增頁面</a>
+        </div>
     </div>
 
     <!-- 狀態篩選 Tab -->

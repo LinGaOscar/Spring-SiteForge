@@ -6,7 +6,10 @@
 <main>
     <div class="d-flex align-items-center justify-content-between mb-4">
         <h5 class="fw-bold mb-0">元件管理</h5>
-        <span class="text-muted small">元件由 portal-web 啟動時自動掃描同步</span>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-muted small">元件由 portal-web 啟動時自動掃描同步</span>
+            <button class="btn btn-outline-secondary btn-sm" onclick="window.location.reload()">↻ 重新整理</button>
+        </div>
     </div>
 
     <!-- 空清單提示 -->
