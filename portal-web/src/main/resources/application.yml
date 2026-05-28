@@ -3,14 +3,10 @@ spring:
     name: portal-web
   jpa:
     open-in-view: false
-  data:
-    redis:
-      host: ${SPRING_DATA_REDIS_HOST:localhost}
-      port: 6379
   cache:
-    type: redis
-    redis:
-      time-to-live: 300000  # 5 分鐘，適合已發布頁面不常變動的特性
+    # 目前無 @Cacheable 使用，改用 ConcurrentHashMap 避免強制依賴 Redis 才能啟動
+    # 待 Plan 2 實作頁面快取後再切回 redis
+    type: simple
 
 server:
   port: 8100
