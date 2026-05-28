@@ -10,6 +10,8 @@ spring:
 
 server:
   port: 8100
+  servlet:
+    context-path: /web
 
 # CMS base URL：Dev 環境需指向 portal-cms (8200)；Docker 環境透過 Nginx 設為空字串即可
 cms:
