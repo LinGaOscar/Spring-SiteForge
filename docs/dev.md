@@ -20,23 +20,16 @@
 ./mvnw.cmd install -DskipTests
 ```
 
-> 專案內建 Maven Wrapper（`mvnw` / `mvnw.cmd`），不需要另外安裝 Maven。
->
-> **Windows 注意**：CMD 請使用 `mvnw.cmd`；PowerShell 可用 `.\mvnw` 或 `.\mvnw.cmd`。
-
 ---
 
 ## 1. 啟動基礎設施
 
 ```bash
-# macOS / Linux：複製環境變數範本並填入密碼
+# macOS / Linux
 cp .env.example .env
 
-# Windows CMD
+# Windows
 copy .env.example .env
-
-# Windows PowerShell
-Copy-Item .env.example .env
 ```
 
 ```bash
@@ -44,6 +37,8 @@ Copy-Item .env.example .env
 # 首次啟動時自動執行 db/init/01_schema.sql 和 02_seed.sql 建立 schema 與種子資料
 docker compose up -d
 ```
+> **重置 DB**：（清除 volume，重新執行 init SQL）
+`docker compose down -v && docker compose up -d`
 
 預設連線資訊（`.env.example` 預設值）：
 
@@ -62,10 +57,11 @@ docker compose up -d
 | 密碼 | `siteforge2026` |
 | 單位 | `00100` |
 | 角色 | `OP + MA` |
-
-> **重置 DB**：（清除 volume，重新執行 init SQL）
-`docker compose down -v && docker compose up -d`
-
+|------|-----|
+| 帳號 | `manager2` |
+| 密碼 | `siteforge2026` |
+| 單位 | `00100` |
+| 角色 | `OP + MA` |
 ---
 
 ## 2. 啟動 portal-cms（後台）
@@ -74,7 +70,7 @@ docker compose up -d
 # macOS / Linux
 ./mvnw spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev
 
-# Windows PowerShell
+# Windows
 .\mvnw.cmd spring-boot:run -pl portal-cms "-Dspring-boot.run.profiles=dev"
 ```
 
@@ -86,18 +82,11 @@ docker compose up -d
 # macOS / Linux
 ./mvnw spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
 
-# Windows PowerShell
+# Windows
 .\mvnw.cmd spring-boot:run -pl portal-web "-Dspring-boot.run.profiles=dev"
 ```
 
 兩個應用可獨立啟動，`portal-web` 不依賴 `portal-cms` 服務。
-
-啟動後入口：
-
-| 模組 | URL |
-|------|-----|
-| portal-cms（後台） | http://localhost:8200/cms/ |
-| portal-web（前台） | http://localhost:8100/web |
 
 ---
 
@@ -105,28 +94,9 @@ docker compose up -d
 
 | 應用 | URL |
 |------|-----|
-| 前台 | http://localhost:8100 |
+| 前台 web| http://localhost:8100 |
 | 後台 CMS | http://localhost:8200 |
 | PostgreSQL | localhost:5432 |
 | Redis | localhost:6379 |
 
 > **圖片存取**：Dev 環境的圖片 URL 前綴為 `http://localhost:8200`（已設定於 `cms.asset-base-url`），因為上傳圖片統一由 portal-cms 的 `/uploads/**` 提供。
-
----
-
-## 執行測試
-
-```bash
-# macOS / Linux
-./mvnw test
-./mvnw test -pl portal-cms
-./mvnw test -pl portal-cms -Dtest=LocalStorageServiceTest  # 單一測試類
-
-# Windows CMD
-mvnw.cmd test
-mvnw.cmd test -pl portal-cms
-mvnw.cmd test -pl portal-cms -Dtest=LocalStorageServiceTest
-
-# Windows PowerShell（-D 參數含等號時需加引號）
-.\mvnw.cmd test -pl portal-cms "-Dtest=LocalStorageServiceTest"
-```
