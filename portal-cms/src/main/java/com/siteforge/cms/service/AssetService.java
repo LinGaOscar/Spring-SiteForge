@@ -5,6 +5,7 @@ import com.siteforge.cms.dto.AssetResponse;
 import com.siteforge.cms.storage.StorageResult;
 import com.siteforge.cms.storage.StorageService;
 import com.siteforge.domain.entity.Asset;
+import com.siteforge.domain.entity.CmsUser;
 import com.siteforge.domain.repository.AssetRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class AssetService {
 
     private final AssetRepository assetRepository;
     private final StorageService storageService;
+    private final CmsUserService cmsUserService;
 
     @Transactional(readOnly = true)
     public List<AssetResponse> findAll() {
@@ -44,11 +46,15 @@ public class AssetService {
 
     public AssetResponse upload(MultipartFile file, String username) {
         StorageResult result = storageService.store(file);
+        // 補 unit 與 uploadedBy，確保 existsByIdAndUnitCode() 查詢能正確比對
+        CmsUser user = cmsUserService.loadUser(username);
         Asset asset = new Asset();
         asset.setFilename(result.originalFilename());
         asset.setFilePath(result.filePath());
         asset.setMimeType(result.mimeType());
         asset.setSize(result.size());
+        asset.setUnit(user.getUnit());
+        asset.setUploadedBy(username);
         asset.setCreatedBy(username);
         return toResponse(assetRepository.save(asset));
     }
