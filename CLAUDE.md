@@ -30,9 +30,8 @@ docker compose up -d
 # 編譯（不啟動）
 ./mvnw compile -pl portal-domain,portal-cms -am
 
-# 執行測試
-./mvnw test -pl portal-cms
-./mvnw test -pl portal-domain
+# 執行測試（commit 前必跑全套）
+./mvnw test -pl portal-web,portal-cms,portal-domain
 ./mvnw test -pl portal-cms -Dtest=LocalStorageServiceTest  # 單一測試類
 
 # 重置 DB（清除所有資料，重新執行 init SQL）
@@ -66,17 +65,26 @@ PUBLISHED → [MA 直接下架] → APPROVED
   → DeviceInterceptor：Cookie(view_mode) > User-Agent → isMobile
   → PageController.renderPage()
       → findPublishedPage(siteId, path)：找不到 → redirect:/
-      → isRwsPage(layoutSet)：RWS 頁面 + 桌面 → redirect:/mobile-required
-      → resolveKey()：TemplateKey.name().toLowerCase() → e.g. "rwd_header"
+      → buildContentViews(pageId)：從 page_content 依 sort_order 組出 List<PageContentView>
+      → isRwsPage(layoutSet, contents)：layoutSet header/footer key 以 RWS_ 開頭，
+                                        或任一 block_key 以 RWS_ 開頭 → 桌面 redirect:/mobile-required
+      → buildModel()：
+          headerTemplate = layoutSet.headerKey.name().toLowerCase()
+          footerTemplate = layoutSet.footerKey.name().toLowerCase()
+          headerConfig   = parseConfig(page.headerConfigJson)  → Map<String,Object>
+          footerConfig   = parseConfig(page.footerConfigJson)  → Map<String,Object>
   → Thymeleaf layout/base.html
-      th:replace fragments/header/__${headerTemplate}__
-      th:replace fragments/body/__${bodyTemplate}__
-      th:replace fragments/footer/__${footerTemplate}__
+      th:replace fragments/header/__${headerTemplate}__ :: header(config=${headerConfig})
+      th:each block : ${pageContents}
+          th:replace fragments/body/__${block.blockKey}__ :: body(config=${block.contentMap})
+      th:replace fragments/footer/__${footerTemplate}__ :: footer(config=${footerConfig})
 ```
 
 - **RWD 模板**（`rwd_*`）：Bootstrap responsive，支援桌面與手機。
 - **RWS 模板**（`rws_*`）：手機限定行銷活動頁，桌面連入會跳提示頁。
+- **body_only_mobile**：RWS 元件，client-side JS 偵測桌面後 alert + redirect 首頁（server-side 防護留待 Plan 2）。
 - `portal.site-id`（application.yml）決定前台對應哪個 Site。
+- `PageContentView` record：`(String blockKey, int sortOrder, Map<String,Object> contentMap)`，contentMap 由 `page_content.content_json`（Jackson）解析。
 
 ## 角色系統（portal-cms）
 
@@ -91,15 +99,21 @@ unit (code PK)
 cms_user → unit
 cms_user_role (user_id, role)
 
-site → page → page_content
+site → page → page_content (block_key, sort_order, content_json, locale)
             → page_version
 page → layout_set (header_key / body_key / footer_key → TemplateKey enum)
 page → unit
+page.header_config_json / footer_config_json  ← 各頁獨立的 header/footer 客製化 JSON
+
+component_definition (key PK, type BODY/HEADER/FOOTER, device_mode RWD/RWS,
+                      schema_json, active, synced_at)
 
 asset → unit
 ```
 
 `page.status` 欄位對應 `PageStatus` enum；所有主要表含 `created_at / updated_at / created_by / updated_by` audit 欄位。
+
+`component_definition` 由 `ComponentSyncRunner` 在 portal-web 啟動時自動同步，掃描 `templates/fragments/{body,header,footer}/*.html`，並解析 HTML 內嵌的 `<!--@component-schema...@end-component-schema-->` 注釋取得 `schema_json` 與 `device_mode`。
 
 ## portal-domain 職責
 
@@ -141,10 +155,64 @@ Schema 和種子資料由 Docker Compose 在**首次建立容器**時執行，�
 
 Schema 變更直接修改 `01_schema.sql`，重置 DB 用 `docker compose down -v && docker compose up -d`。
 
+## 元件開發流程（新增元件 → CMS 發布）
+
+### Step 1：在 portal-web 建立 fragment
+
+於 `portal-web/src/main/resources/templates/fragments/body/` 建立 HTML 檔，依慣例命名（`rwd_` 開頭為 RWD，`rws_` 開頭或 `body_only_mobile` 為 RWS）：
+
+```html
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--@component-schema
+{
+  "deviceMode": "RWD",
+  "fields": [
+    {"name": "title",   "type": "text",      "label": "標題",   "default": "預設標題"},
+    {"name": "imageId", "type": "asset_ids", "label": "主圖",   "default": []},
+    {"name": "body",    "type": "richtext",  "label": "內文",   "default": ""}
+  ]
+}
+@end-component-schema-->
+<div th:fragment="body(config)">
+  <!-- 目前硬編碼展示；Plan 2 改為讀取 config 值渲染 -->
+</div>
+</body>
+</html>
+```
+
+**欄位 type 清單：** `text`、`links`（label+url 陣列）、`asset_ids`（素材 ID 陣列）、`number`、`richtext`
+
+header/footer 同理，fragment 宣告改為 `th:fragment="header(config)"` / `th:fragment="footer(config)"`。
+
+### Step 2：重啟 portal-web，確認元件已同步
+
+```bash
+./mvnw spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
+```
+
+`ComponentSyncRunner` 啟動時自動掃描所有 fragment，將元件寫入 `component_definition`（含 `schema_json`、`device_mode`）。可查 `/cms/components` 確認新元件出現。
+
+### Step 3：CMS 建立頁面並加入元件
+
+1. OP 登入 CMS → `/cms/pages/new`，填入路徑、選擇 header/footer template（TemplateKey 白名單）
+2. 編輯頁面，加入 body 元件（選擇 `block_key`，寫入 `page_content`）
+3. （Plan 2）填寫各欄位 config，存至 `page_content.content_json`
+4. OP 送審 → MA 放行 → APPROVED
+5. OP 申請發布 → MA 放行發布 → **PUBLISHED**
+
+### Step 4：portal-web 渲染
+
+`PageController` 從 DB 取出 `page_content` 組成 `List<PageContentView>`，各 block 的 `contentMap`（JSON 解析）傳入 fragment 的 `config` 參數。
+
+---
+
 ## 開發注意事項
 
 - Dev 管理員帳號（`manager` / `siteforge2026`）由 `db/init/02_seed.sql` 建立，使用 pgcrypto bcrypt，與 Spring Security 相容。
 - 固定單位：`00100`、`00800`、`00850`。
 - `CmsUserService.loadUser(username)` 是所有 CMS controller 取得當前使用者（含 unit）的共用入口。
 - 新增 TemplateKey 值時必須同步建立對應的 HTML fragment 檔案，否則 Thymeleaf 渲染會拋例外。
+- 新增 fragment 後**不需要**手動建任何 JSON 檔，schema 內嵌在 HTML 注釋中，重啟 portal-web 即自動同步。
 - SSO 登入為預留介面，目前僅實作帳密登入。
