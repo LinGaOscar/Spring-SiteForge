@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--@component-schema
+{
+  "deviceMode": "RWD",
+  "fields": [
+    {"name": "title",       "type": "text", "label": "標題",     "default": "準備好升級您的企業官網了嗎？"},
+    {"name": "description", "type": "text", "label": "說明文字", "default": "立即與我們的專業顧問聯繫，獲得免費諮詢報告。"},
+    {"name": "btnText",     "type": "text", "label": "按鈕文字", "default": "免費諮詢"},
+    {"name": "btnUrl",      "type": "text", "label": "按鈕連結", "default": "/contact"}
+  ]
+}
+@end-component-schema-->
+<div th:fragment="body(config)">
+    <section class="py-5 bg-primary text-white text-center">
+        <div class="container">
+            <h3 class="fw-bold mb-3"
+                th:text="${config['title'] ?: '準備好升級您的企業官網了嗎？'}">
+                準備好升級您的企業官網了嗎？
+            </h3>
+            <p class="mb-4 opacity-75"
+               th:text="${config['description'] ?: '立即與我們的專業顧問聯繫，獲得免費諮詢報告。'}">
+                立即與我們的專業顧問聯繫，獲得免費諮詢報告。
+            </p>
+            <a th:href="${config['btnUrl'] ?: '/contact'}"
+               th:text="${config['btnText'] ?: '免費諮詢'}"
+               class="btn btn-light btn-lg px-5 fw-semibold text-primary">免費諮詢</a>
+        </div>
+    </section>
+</div>
+</body>
+</html>
