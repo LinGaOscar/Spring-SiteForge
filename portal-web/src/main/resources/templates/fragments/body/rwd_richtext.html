@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--@component-schema
+{
+  "deviceMode": "RWD",
+  "fields": [
+    {"name": "title",   "type": "text",     "label": "標題（選填）", "default": ""},
+    {"name": "content", "type": "richtext", "label": "內文",        "default": "<p>請在 CMS 填寫此區塊的內容。</p>"}
+  ]
+}
+@end-component-schema-->
+<div th:fragment="body(config)">
+    <section class="py-5">
+        <div class="container" style="max-width:800px">
+            <h2 th:if="${config['title'] != null and !#strings.isEmpty(config['title'])}"
+                th:text="${config['title']}"
+                class="fw-bold mb-4"></h2>
+            <div class="lh-lg"
+                 th:utext="${config['content'] ?: '<p>請在 CMS 填寫此區塊的內容。</p>'}">
+                <p>請在 CMS 填寫此區塊的內容。</p>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>
