@@ -13,4 +13,4 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 cms:
-  preview-base-url: http://localhost:8100
+  preview-base-url: http://localhost:8100/web
