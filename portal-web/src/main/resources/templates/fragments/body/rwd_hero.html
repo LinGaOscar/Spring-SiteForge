@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--@component-schema
+{
+  "deviceMode": "RWD",
+  "fields": [
+    {"name": "badge",    "type": "text", "label": "標籤文字",     "default": "企業形象網站"},
+    {"name": "title",    "type": "text", "label": "主標題",       "default": "打造卓越的數位品牌形象"},
+    {"name": "subtitle", "type": "text", "label": "副標題",       "default": "專業 CMS 平台，讓您輕鬆管理企業官網內容，以最高效率呈現品牌價值。"},
+    {"name": "ctaText",  "type": "text", "label": "主按鈕文字",   "default": "了解服務"},
+    {"name": "ctaUrl",   "type": "text", "label": "主按鈕連結",   "default": "/services"},
+    {"name": "ctaText2", "type": "text", "label": "次要按鈕文字", "default": "立即諮詢"},
+    {"name": "ctaUrl2",  "type": "text", "label": "次要按鈕連結", "default": "/contact"}
+  ]
+}
+@end-component-schema-->
+<div th:fragment="body(config)">
+    <section class="py-6 bg-dark text-white"
+             style="padding-top:6rem;padding-bottom:6rem;
+                    background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);">
+        <div class="container text-center">
+            <span class="badge bg-primary text-uppercase mb-3 px-3 py-2"
+                  th:text="${config['badge'] ?: '企業形象網站'}">企業形象網站</span>
+            <h1 class="display-4 fw-bold mb-4"
+                th:text="${config['title'] ?: '打造卓越的數位品牌形象'}">
+                打造卓越的數位品牌形象
+            </h1>
+            <p class="lead text-secondary mb-5 mx-auto" style="max-width:600px"
+               th:text="${config['subtitle'] ?: '專業 CMS 平台，讓您輕鬆管理企業官網內容，以最高效率呈現品牌價值。'}">
+                專業 CMS 平台，讓您輕鬆管理企業官網內容，以最高效率呈現品牌價值。
+            </p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a th:href="${config['ctaUrl'] ?: '/services'}"
+                   th:text="${config['ctaText'] ?: '了解服務'}"
+                   class="btn btn-primary btn-lg px-5">了解服務</a>
+                <a th:href="${config['ctaUrl2'] ?: '/contact'}"
+                   th:text="${config['ctaText2'] ?: '立即諮詢'}"
+                   class="btn btn-outline-light btn-lg px-5">立即諮詢</a>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>
