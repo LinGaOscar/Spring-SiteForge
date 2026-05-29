@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--@component-schema
+{
+  "deviceMode": "RWD",
+  "fields": [
+    {"name": "stat1",  "type": "text", "label": "數字 1", "default": "500+"},
+    {"name": "label1", "type": "text", "label": "標籤 1", "default": "服務企業客戶"},
+    {"name": "stat2",  "type": "text", "label": "數字 2", "default": "99.9%"},
+    {"name": "label2", "type": "text", "label": "標籤 2", "default": "系統穩定度"},
+    {"name": "stat3",  "type": "text", "label": "數字 3", "default": "10年+"},
+    {"name": "label3", "type": "text", "label": "標籤 3", "default": "產業深耕經驗"},
+    {"name": "stat4",  "type": "text", "label": "數字 4", "default": "24/7"},
+    {"name": "label4", "type": "text", "label": "標籤 4", "default": "全年技術支援"}
+  ]
+}
+@end-component-schema-->
+<div th:fragment="body(config)">
+    <section class="py-5 bg-white border-bottom">
+        <div class="container">
+            <div class="row text-center g-4">
+                <div class="col-6 col-md-3">
+                    <div class="fs-1 fw-bold text-primary"
+                         th:text="${config['stat1'] ?: '500+'}">500+</div>
+                    <div class="small text-muted mt-1"
+                         th:text="${config['label1'] ?: '服務企業客戶'}">服務企業客戶</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="fs-1 fw-bold text-primary"
+                         th:text="${config['stat2'] ?: '99.9%'}">99.9%</div>
+                    <div class="small text-muted mt-1"
+                         th:text="${config['label2'] ?: '系統穩定度'}">系統穩定度</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="fs-1 fw-bold text-primary"
+                         th:text="${config['stat3'] ?: '10年+'}">10年+</div>
+                    <div class="small text-muted mt-1"
+                         th:text="${config['label3'] ?: '產業深耕經驗'}">產業深耕經驗</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="fs-1 fw-bold text-primary"
+                         th:text="${config['stat4'] ?: '24/7'}">24/7</div>
+                    <div class="small text-muted mt-1"
+                         th:text="${config['label4'] ?: '全年技術支援'}">全年技術支援</div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>
