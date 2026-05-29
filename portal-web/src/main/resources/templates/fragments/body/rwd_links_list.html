@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--@component-schema
+{
+  "deviceMode": "RWD",
+  "fields": [
+    {"name": "title",       "type": "text",  "label": "區塊標題",       "default": "相關連結"},
+    {"name": "description", "type": "text",  "label": "說明文字（選填）", "default": ""},
+    {"name": "links",       "type": "links", "label": "連結清單",       "default": [
+      {"label": "首頁",     "url": "/"},
+      {"label": "關於我們", "url": "/about"},
+      {"label": "服務項目", "url": "/services"}
+    ]}
+  ]
+}
+@end-component-schema-->
+<div th:fragment="body(config)">
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold"
+                    th:text="${config['title'] ?: '相關連結'}">相關連結</h2>
+                <p th:if="${config['description'] != null and !#strings.isEmpty(config['description'])}"
+                   th:text="${config['description']}"
+                   class="text-muted mb-0"></p>
+            </div>
+            <div class="row g-3 justify-content-center">
+                <div th:if="${config['links'] != null}"
+                     th:each="link : ${config['links']}"
+                     class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <a th:href="${link['url']}"
+                       th:text="${link['label']}"
+                       class="card border-0 shadow-sm text-decoration-none text-dark d-block p-4 text-center h-100 fw-semibold">
+                        連結
+                    </a>
+                </div>
+                <div th:if="${config['links'] == null or #lists.isEmpty(config['links'])}"
+                     class="col-12 text-center text-muted py-4">
+                    尚未設定連結，請在 CMS 編輯元件內容。
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>
