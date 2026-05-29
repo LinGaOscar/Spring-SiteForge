@@ -99,6 +99,6 @@ public class WorkflowController {
         } catch (IllegalStateException | IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:/cms/pages";
+        return "redirect:/pages";
     }
 }

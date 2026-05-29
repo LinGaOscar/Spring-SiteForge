@@ -57,7 +57,7 @@ public class CmsPageContentViewController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:/cms/pages/" + pageId + "/edit";
+        return "redirect:/pages/" + pageId + "/edit";
     }
 
     @PostMapping("/{contentId}")
@@ -78,7 +78,7 @@ public class CmsPageContentViewController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:/cms/pages/" + pageId + "/edit";
+        return "redirect:/pages/" + pageId + "/edit";
     }
 
     @PostMapping("/{contentId}/delete")
@@ -94,7 +94,7 @@ public class CmsPageContentViewController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:/cms/pages/" + pageId + "/edit";
+        return "redirect:/pages/" + pageId + "/edit";
     }
 
     private Page loadAndCheck(Long pageId, CmsUser actor) {

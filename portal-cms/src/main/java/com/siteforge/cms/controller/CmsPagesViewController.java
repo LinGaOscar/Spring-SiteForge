@@ -64,7 +64,7 @@ public class CmsPagesViewController {
     public String newForm(@AuthenticationPrincipal UserDetails ud, Model model) {
         CmsUser actor = cmsUserService.loadUser(ud.getUsername());
         if (!actor.getRoles().contains(CmsUserRole.OP)) {
-            return "redirect:/cms/pages";
+            return "redirect:/pages";
         }
         model.addAttribute("actor", actor);
         model.addAttribute("page", new Page());
@@ -85,7 +85,7 @@ public class CmsPagesViewController {
         boolean editable = actor.getRoles().contains(CmsUserRole.OP)
                 && (page.getStatus() == PageStatus.DRAFT || page.getStatus() == PageStatus.APPROVED)
                 && unitCode(actor).equals(unitCode(page));
-        if (!editable) return "redirect:/cms/pages";
+        if (!editable) return "redirect:/pages";
 
         model.addAttribute("actor", actor);
         model.addAttribute("page", page);
@@ -111,7 +111,7 @@ public class CmsPagesViewController {
         CmsUser actor = cmsUserService.loadUser(ud.getUsername());
         if (!actor.getRoles().contains(CmsUserRole.OP)) {
             ra.addFlashAttribute("error", "無新增頁面權限");
-            return "redirect:/cms/pages";
+            return "redirect:/pages";
         }
         var site = siteRepository.findById(siteId)
                 .orElseThrow(() -> new IllegalArgumentException("Site not found"));
@@ -130,7 +130,7 @@ public class CmsPagesViewController {
         Page saved = pageRepository.save(page);
 
         ra.addFlashAttribute("success", "頁面已建立（草稿），請繼續設定 Body 區塊");
-        return "redirect:/cms/pages/" + saved.getId() + "/edit";
+        return "redirect:/pages/" + saved.getId() + "/edit";
     }
 
     @PostMapping("/{id}")
@@ -152,7 +152,7 @@ public class CmsPagesViewController {
                 && unitCode(actor).equals(unitCode(page));
         if (!editable) {
             ra.addFlashAttribute("error", "無編輯此頁面的權限");
-            return "redirect:/cms/pages";
+            return "redirect:/pages";
         }
 
         page.setPath(path);
@@ -164,7 +164,7 @@ public class CmsPagesViewController {
         pageRepository.save(page);
 
         ra.addFlashAttribute("success", "頁面已更新");
-        return "redirect:/cms/pages/" + id + "/edit";
+        return "redirect:/pages/" + id + "/edit";
     }
 
     @PostMapping("/{id}/delete")
@@ -180,12 +180,12 @@ public class CmsPagesViewController {
                 && unitCode(actor).equals(unitCode(page));
         if (!deletable) {
             ra.addFlashAttribute("error", "僅可刪除草稿狀態的頁面");
-            return "redirect:/cms/pages";
+            return "redirect:/pages";
         }
 
         pageRepository.deleteById(id);
         ra.addFlashAttribute("success", "頁面已刪除");
-        return "redirect:/cms/pages";
+        return "redirect:/pages";
     }
 
     // 依 headerKey + footerKey 找現有 LayoutSet，找不到則自動建立

@@ -50,7 +50,7 @@ public class CmsAssetsViewController {
                          || actor.getRoles().contains(CmsUserRole.MA);
         if (!canUpload) {
             ra.addFlashAttribute("error", "無上傳權限");
-            return "redirect:/cms/assets";
+            return "redirect:/assets";
         }
         try {
             var result = storageService.store(file);
@@ -67,7 +67,7 @@ public class CmsAssetsViewController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "上傳失敗：" + e.getMessage());
         }
-        return "redirect:/cms/assets";
+        return "redirect:/assets";
     }
 
     @PostMapping("/{id}/delete")
@@ -82,10 +82,10 @@ public class CmsAssetsViewController {
                          && assetRepository.existsByIdAndUnitCode(id, unitCode);
         if (!canDelete) {
             ra.addFlashAttribute("error", "無刪除權限（只能刪除本單位上傳的素材）");
-            return "redirect:/cms/assets";
+            return "redirect:/assets";
         }
         assetRepository.deleteById(id);
         ra.addFlashAttribute("success", "素材已刪除");
-        return "redirect:/cms/assets";
+        return "redirect:/assets";
     }
 }
