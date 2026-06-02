@@ -1,7 +1,9 @@
 package com.siteforge.cms.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siteforge.cms.dto.PageContentRequest;
 import com.siteforge.cms.dto.PageContentResponse;
+import com.siteforge.domain.entity.ComponentDefinition;
 import com.siteforge.domain.entity.Page;
 import com.siteforge.domain.entity.PageContent;
 import com.siteforge.domain.repository.ComponentDefinitionRepository;
@@ -27,14 +29,27 @@ class PageContentServiceTest {
     @Mock PageContentRepository pageContentRepository;
     @Mock PageRepository pageRepository;
     @Mock ComponentDefinitionRepository componentDefinitionRepository;
+    @Mock ObjectMapper objectMapper;
+    @Mock HtmlSanitizerService htmlSanitizerService;
     @InjectMocks PageContentService pageContentService;
+
+    // applyRequest 現改用 findById；schemaJson=null 時不含 richtext 欄位，sanitize 直接跳過
+    private ComponentDefinition makeBodyDef(String key) {
+        ComponentDefinition def = new ComponentDefinition();
+        def.setKey(key);
+        def.setType("BODY");
+        def.setActive(true);
+        def.setSchemaJson(null);
+        return def;
+    }
 
     @Test
     void create_validBlockKey_returnsSavedContent() {
         Page page = new Page();
         page.setId(1L);
         when(pageRepository.findById(1L)).thenReturn(Optional.of(page));
-        when(componentDefinitionRepository.existsByKeyAndTypeAndActiveTrue("rwd_body_01", "BODY")).thenReturn(true);
+        when(componentDefinitionRepository.findById("rwd_body_01"))
+            .thenReturn(Optional.of(makeBodyDef("rwd_body_01")));
 
         PageContentRequest request = new PageContentRequest();
         request.setBlockKey("rwd_body_01");
@@ -58,7 +73,7 @@ class PageContentServiceTest {
         Page page = new Page();
         page.setId(1L);
         when(pageRepository.findById(1L)).thenReturn(Optional.of(page));
-        when(componentDefinitionRepository.existsByKeyAndTypeAndActiveTrue("unknown_key", "BODY")).thenReturn(false);
+        when(componentDefinitionRepository.findById("unknown_key")).thenReturn(Optional.empty());
 
         PageContentRequest request = new PageContentRequest();
         request.setBlockKey("unknown_key");
