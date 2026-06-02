@@ -51,14 +51,14 @@ class SecurityConfigMethodSecurityTest {
     @Test
     @WithMockUser(roles = "EDITOR")
     void deleteAsEditor_returns403() throws Exception {
-        mockMvc.perform(delete("/api/cms/pages/1").with(csrf()))
+        mockMvc.perform(delete("/api/pages/1").with(csrf()))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(roles = "MA")
     void deleteAsManager_returns204() throws Exception {
-        mockMvc.perform(delete("/api/cms/pages/1").with(csrf()))
+        mockMvc.perform(delete("/api/pages/1").with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
