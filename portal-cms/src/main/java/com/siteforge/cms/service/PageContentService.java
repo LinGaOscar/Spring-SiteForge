@@ -1,7 +1,10 @@
 package com.siteforge.cms.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siteforge.cms.dto.PageContentRequest;
 import com.siteforge.cms.dto.PageContentResponse;
+import com.siteforge.domain.entity.ComponentDefinition;
 import com.siteforge.domain.entity.Page;
 import com.siteforge.domain.entity.PageContent;
 import com.siteforge.domain.repository.ComponentDefinitionRepository;
@@ -12,6 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +28,8 @@ public class PageContentService {
     private final PageContentRepository pageContentRepository;
     private final PageRepository pageRepository;
     private final ComponentDefinitionRepository componentDefinitionRepository;
+    private final ObjectMapper objectMapper;
+    private final HtmlSanitizerService htmlSanitizerService;
 
     @Transactional(readOnly = true)
     public List<PageContentResponse> findByPageId(Long pageId) {
@@ -58,13 +67,50 @@ public class PageContentService {
 
     private void applyRequest(PageContent content, PageContentRequest request) {
         String key = request.getBlockKey() != null ? request.getBlockKey().toLowerCase() : null;
-        if (key == null || !componentDefinitionRepository.existsByKeyAndTypeAndActiveTrue(key, "BODY"))
-            throw new IllegalArgumentException("blockKey 不在已登記的元件清單中：" + key);
+        ComponentDefinition def = componentDefinitionRepository.findById(key)
+            .filter(d -> Boolean.TRUE.equals(d.getActive()))
+            .filter(d -> "BODY".equals(d.getType()))
+            .orElseThrow(() -> new IllegalArgumentException("blockKey 不在已登記的元件清單中：" + key));
         content.setBlockKey(key);
         content.setSortOrder(request.getSortOrder());
-        content.setContentJson(request.getContentJson());
+        content.setContentJson(sanitizeRichtextFields(request.getContentJson(), def.getSchemaJson()));
         if (request.getLocale() != null && !request.getLocale().isBlank())
             content.setLocale(request.getLocale());
+    }
+
+    private String sanitizeRichtextFields(String contentJson, String schemaJson) {
+        if (contentJson == null || contentJson.isBlank()) return contentJson;
+        try {
+            Set<String> richtextFields = parseRichtextFieldNames(schemaJson);
+            if (richtextFields.isEmpty()) return contentJson;
+            Map<String, Object> map = objectMapper.readValue(contentJson, new TypeReference<>() {});
+            for (String field : richtextFields) {
+                if (map.get(field) instanceof String raw) {
+                    map.put(field, htmlSanitizerService.sanitize(raw));
+                }
+            }
+            return objectMapper.writeValueAsString(map);
+        } catch (Exception e) {
+            // 解析失敗時保留原值，不影響儲存流程
+            return contentJson;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Set<String> parseRichtextFieldNames(String schemaJson) {
+        if (schemaJson == null || schemaJson.isBlank()) return Set.of();
+        try {
+            Map<String, Object> schema = objectMapper.readValue(schemaJson, new TypeReference<>() {});
+            List<Map<String, Object>> fields = (List<Map<String, Object>>) schema.get("fields");
+            if (fields == null) return Set.of();
+            return fields.stream()
+                .filter(f -> "richtext".equals(f.get("type")))
+                .map(f -> (String) f.get("name"))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        } catch (Exception e) {
+            return Set.of();
+        }
     }
 
     private PageContentResponse toResponse(PageContent c) {
