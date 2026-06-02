@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/siteforge_db
-    username: siteforge
-    password: siteforge
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/siteforge_db}
+    username: ${DB_USER:siteforge}
+    password: ${DB_PASSWORD:siteforge}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
