@@ -11,6 +11,7 @@ import com.siteforge.domain.repository.ComponentDefinitionRepository;
 import com.siteforge.domain.repository.PageContentRepository;
 import com.siteforge.domain.repository.PageRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -91,7 +93,7 @@ public class PageContentService {
             }
             return objectMapper.writeValueAsString(map);
         } catch (Exception e) {
-            // 解析失敗時保留原值，不影響儲存流程
+            log.warn("richtext 消毒失敗，保留原始 contentJson: {}", e.getMessage());
             return contentJson;
         }
     }
@@ -107,8 +109,9 @@ public class PageContentService {
                 .filter(f -> "richtext".equals(f.get("type")))
                 .map(f -> (String) f.get("name"))
                 .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toUnmodifiableSet());
         } catch (Exception e) {
+            log.warn("schema JSON 解析失敗，跳過 richtext 消毒: {}", e.getMessage());
             return Set.of();
         }
     }
