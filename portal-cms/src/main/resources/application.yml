@@ -20,3 +20,13 @@ server:
 
 storage:
   upload-dir: ./uploads
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

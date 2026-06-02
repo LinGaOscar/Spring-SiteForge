@@ -59,8 +59,8 @@ public class SecurityConfig {
                 .ignoringRequestMatchers("/api/**")
             )
             .authorizeHttpRequests(auth -> auth
-                // 登入頁、靜態資源、錯誤頁、上傳素材對外開放
-                .requestMatchers("/css/**", "/js/**", "/error", "/uploads/**").permitAll()
+                // 登入頁、靜態資源、錯誤頁、上傳素材、health check 對外開放
+                .requestMatchers("/css/**", "/js/**", "/error", "/uploads/**", "/actuator/health").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
