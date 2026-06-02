@@ -30,10 +30,16 @@ public class CmsPageContentViewController {
     @GetMapping
     public String list(@PathVariable Long pageId,
                        @AuthenticationPrincipal UserDetails ud,
-                       Model model) {
+                       Model model,
+                       RedirectAttributes ra) {
         CmsUser actor = cmsUserService.loadUser(ud.getUsername());
-        Page page = loadAndCheck(pageId, actor);
-
+        Page page;
+        try {
+            page = loadAndCheck(pageId, actor);
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            return "redirect:/pages";
+        }
         model.addAttribute("actor", actor);
         model.addAttribute("page", page);
         model.addAttribute("contents", pageContentRepository.findByPageIdOrderBySortOrder(pageId));

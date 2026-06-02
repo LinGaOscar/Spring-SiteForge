@@ -64,8 +64,9 @@
                                target="_blank"
                                class="btn btn-sm btn-outline-secondary py-0">↗ 預覽</a>
 
-                            <!-- 元件組成 -->
-                            <a th:href="@{/pages/{id}/content(id=${p.id})}"
+                            <!-- 元件組成：僅 OP 且頁面可編輯時顯示 -->
+                            <a th:if="${isOP and (p.status.name() == 'DRAFT' or p.status.name() == 'APPROVED')}"
+                               th:href="@{/pages/{id}/content(id=${p.id})}"
                                class="btn btn-sm btn-outline-info py-0">元件</a>
 
                             <!-- OP 編輯 -->
