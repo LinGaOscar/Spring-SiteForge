@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "page",
@@ -51,6 +53,14 @@ public class Page {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private PageStatus status = PageStatus.DRAFT;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+        name = "page_visibility",
+        joinColumns = @JoinColumn(name = "page_id")
+    )
+    @Column(name = "unit_code", length = 5)
+    private Set<String> visibleUnitCodes = new HashSet<>();
 
     @Column(name = "review_note", length = 500)
     private String reviewNote;
