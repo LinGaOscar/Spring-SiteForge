@@ -4,6 +4,8 @@ import com.siteforge.domain.entity.Page;
 import com.siteforge.domain.enums.PageStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,4 +41,17 @@ public interface PageRepository extends JpaRepository<Page, Long> {
     @EntityGraph(attributePaths = {"site", "layoutSet", "unit"})
     List<Page> findByUnitCodeAndStatusInOrderBySubmittedAtDesc(
             String unitCode, List<PageStatus> statuses);
+
+    // 查詢 owner 或 visible 的頁面（不篩選狀態，支援跨單位可見性）
+    @Query("SELECT DISTINCT p FROM Page p LEFT JOIN p.visibleUnitCodes v " +
+           "WHERE p.unit.code = :unitCode OR v = :unitCode")
+    @EntityGraph(attributePaths = {"site", "layoutSet", "unit"})
+    List<Page> findByOwnerOrVisibleUnit(@Param("unitCode") String unitCode);
+
+    // 查詢 owner 或 visible 的頁面（篩選特定狀態，支援跨單位可見性）
+    @Query("SELECT DISTINCT p FROM Page p LEFT JOIN p.visibleUnitCodes v " +
+           "WHERE (p.unit.code = :unitCode OR v = :unitCode) AND p.status = :status")
+    @EntityGraph(attributePaths = {"site", "layoutSet", "unit"})
+    List<Page> findByOwnerOrVisibleUnitAndStatus(@Param("unitCode") String unitCode,
+                                                  @Param("status") PageStatus status);
 }
