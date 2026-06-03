@@ -50,7 +50,7 @@
                             共享
                         </span>
                         <span th:unless="${sharedPageIds.contains(p.id)}"
-                              class="text-muted" th:text="${p.unit?.code ?: '—'}"></span>
+                              class="text-muted" th:text="${p.unit != null ? p.unit.code : '—'}"></span>
                     </td>
                     <td th:text="${p.title}"></td>
                     <td class="small text-muted"
