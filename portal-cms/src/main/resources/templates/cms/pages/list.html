@@ -32,6 +32,7 @@
                 <thead class="table-light">
                 <tr>
                     <th>路徑</th>
+                    <th>單位</th>
                     <th>標題</th>
                     <th>Layout</th>
                     <th>狀態</th>
@@ -43,6 +44,14 @@
                 <tbody>
                 <tr th:each="p : ${pages}">
                     <td class="text-muted small" th:text="${p.path}"></td>
+                    <td class="small">
+                        <span th:if="${sharedPageIds.contains(p.id)}"
+                              class="badge bg-light text-secondary border">
+                            共享
+                        </span>
+                        <span th:unless="${sharedPageIds.contains(p.id)}"
+                              class="text-muted" th:text="${p.unit?.code ?: '—'}"></span>
+                    </td>
                     <td th:text="${p.title}"></td>
                     <td class="small text-muted"
                         th:text="${p.layoutSet?.name ?: '—'}"></td>
@@ -64,6 +73,7 @@
                                target="_blank"
                                class="btn btn-sm btn-outline-secondary py-0">↗ 預覽</a>
 
+                            <th:block th:unless="${sharedPageIds.contains(p.id)}">
                             <!-- 元件組成：僅 OP 且頁面可編輯時顯示 -->
                             <a th:if="${isOP and (p.status.name() == 'DRAFT' or p.status.name() == 'APPROVED')}"
                                th:href="@{/pages/{id}/content(id=${p.id})}"
@@ -129,11 +139,12 @@
                                   th:action="@{/pages/{id}/confirm-unpublish(id=${p.id})}" method="post">
                                 <button class="btn btn-sm btn-warning py-0">確認下架</button>
                             </form>
+                            </th:block>
                         </div>
                     </td>
                 </tr>
                 <tr th:if="${pages.isEmpty()}">
-                    <td colspan="7" class="text-center text-muted py-4">此狀態下無頁面</td>
+                    <td colspan="8" class="text-center text-muted py-4">此狀態下無頁面</td>
                 </tr>
                 </tbody>
             </table>
