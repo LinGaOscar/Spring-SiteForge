@@ -12,6 +12,7 @@ import com.siteforge.domain.repository.PageContentRepository;
 import com.siteforge.domain.repository.PageRepository;
 import com.siteforge.domain.repository.ComponentDefinitionRepository;
 import com.siteforge.domain.repository.SiteRepository;
+import com.siteforge.domain.repository.UnitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,7 +23,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/pages")
@@ -35,6 +39,7 @@ public class CmsPagesViewController {
     private final PageContentRepository pageContentRepository;
     private final SiteRepository siteRepository;
     private final ComponentDefinitionRepository componentDefinitionRepository;
+    private final UnitRepository unitRepository;
 
     @Value("${cms.preview-base-url:}")
     private String previewBaseUrl;
@@ -47,11 +52,18 @@ public class CmsPagesViewController {
         String unitCode = cmsUserService.unitCode(actor);
 
         List<Page> pages = (status != null && !status.isBlank())
-                ? pageRepository.findByUnitCodeAndStatus(unitCode, PageStatus.valueOf(status))
-                : pageRepository.findByUnitCode(unitCode);
+                ? pageRepository.findByOwnerOrVisibleUnitAndStatus(unitCode, PageStatus.valueOf(status))
+                : pageRepository.findByOwnerOrVisibleUnit(unitCode);
+
+        // 非本單位的頁面為「共享頁面」，前端以此判斷唯讀
+        Set<Long> sharedPageIds = pages.stream()
+                .filter(p -> !unitCode.equals(p.getUnit() != null ? p.getUnit().getCode() : ""))
+                .map(Page::getId)
+                .collect(Collectors.toSet());
 
         model.addAttribute("actor", actor);
         model.addAttribute("pages", pages);
+        model.addAttribute("sharedPageIds", sharedPageIds);
         model.addAttribute("selectedStatus", status);
         model.addAttribute("statuses", PageStatus.values());
         model.addAttribute("isMA", actor.getRoles().contains(CmsUserRole.MA));
@@ -94,6 +106,8 @@ public class CmsPagesViewController {
         model.addAttribute("bodyKeys", componentDefinitionRepository.findByTypeAndActiveTrue("BODY"));
         model.addAttribute("pageContents", pageContentRepository.findByPageIdOrderBySortOrder(id));
         model.addAttribute("previewBaseUrl", previewBaseUrl);
+        model.addAttribute("allUnits", unitRepository.findByEnabledTrue());
+        model.addAttribute("visibleUnitCodes", page.getVisibleUnitCodes());
         return "cms/pages/form";
     }
 
@@ -141,6 +155,7 @@ public class CmsPagesViewController {
                          @RequestParam(required = false) String seoDescription,
                          @RequestParam(required = false) String headerKey,
                          @RequestParam(required = false) String footerKey,
+                         @RequestParam(value = "visibleUnitCodes", required = false) List<String> visibleUnitCodes,
                          @AuthenticationPrincipal UserDetails ud,
                          RedirectAttributes ra) {
         CmsUser actor = cmsUserService.loadUser(ud.getUsername());
@@ -161,6 +176,9 @@ public class CmsPagesViewController {
         page.setSeoDescription(seoDescription);
         page.setLayoutSet(resolveLayoutSet(headerKey, footerKey, actor.getUsername()));
         page.setUpdatedBy(actor.getUsername());
+        page.setVisibleUnitCodes(
+            visibleUnitCodes != null ? new HashSet<>(visibleUnitCodes) : new HashSet<>()
+        );
         pageRepository.save(page);
 
         ra.addFlashAttribute("success", "頁面已更新");
