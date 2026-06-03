@@ -106,6 +106,13 @@ CREATE TABLE page_version (
     UNIQUE (page_id, version_no)
 );
 
+-- 頁面可見單位（跨單位唯讀共享）
+CREATE TABLE page_visibility (
+    page_id   BIGINT     NOT NULL REFERENCES page(id) ON DELETE CASCADE,
+    unit_code VARCHAR(5) NOT NULL REFERENCES unit(code),
+    PRIMARY KEY (page_id, unit_code)
+);
+
 -- 素材
 CREATE TABLE asset (
     id          BIGSERIAL    PRIMARY KEY,
