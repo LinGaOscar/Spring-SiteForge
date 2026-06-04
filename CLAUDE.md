@@ -89,6 +89,18 @@ PUBLISHED → [MA 直接下架] → APPROVED
 Spring Security authority 格式：`ROLE_MA`、`ROLE_OP`、`ROLE_VI`。  
 `CmsUser.roles` 以 `@ElementCollection` 儲存於 `cms_user_role(user_id, role)`。
 
+## CMS 雙層 Controller 架構
+
+portal-cms 的 controller 分兩類，命名與職責截然不同：
+
+| 類型 | 命名慣例 | 路徑 | 回傳 |
+|------|----------|------|------|
+| **View Controller** | `Cms*ViewController` | `/cws/**`（Thymeleaf SSR） | `String`（template 名稱）＋ `Model` |
+| **REST Controller** | `PageController`、`WorkflowController` 等 | `/api/**`（CSRF 豁免） | `ApiResponse<T>` |
+
+`ApiResponse<T>` 是所有 REST 端點的統一回應包裝：`{ "success": true/false, "data": T, "message": "..." }`。  
+View Controller 的 Thymeleaf template 透過 Ajax 呼叫對應的 REST endpoint（例如頁面內容的增刪改由 `/api/pages/{id}/contents` 負責）。
+
 ## 主要資料表關係
 
 ```
@@ -97,7 +109,8 @@ cms_user → unit
 cms_user_role (user_id, role)
 
 site → page → page_content (block_key, sort_order, content_json, locale)
-            → page_version
+            → page_version (version_no, snapshot_json)
+            → page_visibility (unit_code)  ← 跨單位唯讀可見性
 page → layout_set (header_key / body_key / footer_key → TemplateKey enum)
 page → unit
 page.header_config_json / footer_config_json  ← 各頁獨立的 header/footer 客製化 JSON
@@ -112,11 +125,27 @@ asset → unit
 
 `component_definition` 由 `ComponentSyncRunner` 在 portal-web 啟動時自動同步，掃描 `templates/fragments/{body,header,footer}/*.html`，並解析 HTML 內嵌的 `<!--@component-schema...@end-component-schema-->` 注釋取得 `schema_json` 與 `device_mode`。
 
+## 跨單位頁面可見性（Page Visibility）
+
+`page_visibility(page_id, unit_code)` join table，透過 `Page.visibleUnitCodes`（`@ElementCollection`）管理。  
+Owner unit 持有完整編輯與工作流權限；visible unit 只能查看列表，無法操作任何按鈕。
+
+- `PageRepository.findByOwnerOrVisibleUnit(unitCode)` — JPQL OR 查詢，同時撈出 owner 與 visible 的頁面（`SELECT DISTINCT`）
+- `CmsPagesViewController` 計算 `sharedPageIds` set，傳入 Thymeleaf 判斷哪些頁面隱藏操作按鈕
+- 所有 `PageRepository` 查詢均加 `@EntityGraph(attributePaths = {"site","layoutSet","unit"})` 預先載入關聯，避免 N+1
+
+## 版本管理與回滾
+
+`PublishService` 負責版本快照與回滾：
+
+- `snapshotPublished(pageId, publishedBy)` — `approvePublish` 後呼叫，建立 `page_version` 快照（不重複修改 page status）
+- `rollback(pageId, versionId, username)` — 從 snapshot JSON 還原 page 欄位與 page_content；呼叫 `pageContentRepository.deleteAllByPageId()` 後必須重新 `findById` 取得受管理的 entity（`clearAutomatically=true` 會使 entity 變 detached）
+
 ## portal-domain 職責
 
 - JPA Entity：`Page`、`LayoutSet`、`PageContent`、`PageVersion`、`Asset`、`CmsUser`、`Unit`
 - 共用 enum：`PageStatus`、`TemplateKey`、`CmsUserRole`
-- Repository 介面：`PageRepository` 含 `findByUnitCode*` 系列方法用於單位隔離查詢
+- Repository 介面：`PageRepository` 含 `findByUnitCode*` 系列方法用於單位隔離查詢，`findByOwnerOrVisibleUnit*` 用於跨單位可見性查詢
 
 ## CMS 後台路由
 
@@ -226,6 +255,14 @@ GET /web/preview/{pageId}         dev 環境：渲染任意 page（含未發布�
 `cms.preview-base-url`（dev）已設為 `http://localhost:8100/web`，包含 context-path，CMS 的「↗ 預覽」連結才能正確指向 portal-web。
 
 ---
+
+## 素材儲存（LocalStorageService）
+
+素材上傳存至 portal-cms 的 `./uploads/YYYY/MM/UUID.ext`（由 `storage.upload-dir` 設定）。
+
+- **SVG 刻意排除**：瀏覽器會渲染並執行內嵌 JS，構成 stored XSS 風險；允許的 MIME 白名單：`image/jpeg`、`image/png`、`image/gif`、`image/webp`、`application/pdf`、Office 文件（doc/docx/xls/xlsx）。
+- **Richtext 寫入必須過 `HtmlSanitizerService`**（OWASP Java HTML Sanitizer）：允許格式/連結/區塊/圖片標籤，其餘全部清除。
+- portal-web template 引用素材的 URL 格式：`${cmsAssetBaseUrl}/uploads/YYYY/MM/UUID.ext`；`cms.asset-base-url` dev 設為 `http://localhost:8200`，Docker/正式環境透過 Nginx 代理設為空字串即可。
 
 ## 開發注意事項
 
