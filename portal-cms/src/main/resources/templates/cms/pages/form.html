@@ -16,7 +16,7 @@
         <div class="col-lg-7">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
-                    <form th:action="${page?.id == null ? '/pages' : '/pages/' + page.id}"
+                    <form th:action="${page?.id == null} ? @{/pages} : @{/pages/{id}(id=${page.id})}"
                           method="post">
 
                         <h6 class="fw-semibold mb-3">基本資訊</h6>

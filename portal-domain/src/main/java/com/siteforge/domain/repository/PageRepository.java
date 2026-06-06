@@ -15,7 +15,7 @@ public interface PageRepository extends JpaRepository<Page, Long> {
     @EntityGraph(attributePaths = {"site", "layoutSet", "unit"})
     List<Page> findAll();
 
-    @EntityGraph(attributePaths = {"site", "layoutSet", "unit"})
+    @EntityGraph(attributePaths = {"site", "layoutSet", "unit", "visibleUnitCodes"})
     Optional<Page> findById(Long id);
 
     @EntityGraph(attributePaths = {"site", "layoutSet", "unit"})
