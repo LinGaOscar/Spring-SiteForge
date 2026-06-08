@@ -7,7 +7,7 @@ CMS 編輯者在 content_json 中填入完整 URL，Thymeleaf 直接渲染：
 
 ```json
 {
-  "imageUrl": "http://localhost:8200/cws/uploads/about/company.png"
+  "imageUrl": "http://localhost:8200/cms/uploads/about/company.png"
 }
 ```
 
@@ -64,7 +64,7 @@ Thymeleaf fragment 改用 `${config['imageIdUrl'] ?: ''}` 讀取。
 
 ```yaml
 portal:
-  asset-base-url: http://localhost:8200/cws
+  asset-base-url: http://localhost:8200/cms
 ```
 
 正式環境（`application-prod.yml`）填入對應 CDN 或主機位址。

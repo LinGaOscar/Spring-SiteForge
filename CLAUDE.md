@@ -28,7 +28,7 @@ docker compose down -v && docker compose up -d
 
 # 4. 啟動應用（portal-web 先啟動，ComponentSyncRunner 掃描完元件後 CMS 選單才有資料）
 ./mvnw spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev   # http://localhost:8100/web/
-./mvnw spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev   # http://localhost:8200/cws/
+./mvnw spring-boot:run -pl portal-cms -Dspring-boot.run.profiles=dev   # http://localhost:8200/cms/
 
 # 5. 測試（commit 前必跑全套）
 ./mvnw test -pl portal-web,portal-cms,portal-domain
@@ -95,7 +95,7 @@ portal-cms 的 controller 分兩類，命名與職責截然不同：
 
 | 類型 | 命名慣例 | 路徑 | 回傳 |
 |------|----------|------|------|
-| **View Controller** | `Cms*ViewController` | `/cws/**`（Thymeleaf SSR） | `String`（template 名稱）＋ `Model` |
+| **View Controller** | `Cms*ViewController` | `/cms/**`（Thymeleaf SSR） | `String`（template 名稱）＋ `Model` |
 | **REST Controller** | `PageController`、`WorkflowController` 等 | `/api/**`（CSRF 豁免） | `ApiResponse<T>` |
 
 `ApiResponse<T>` 是所有 REST 端點的統一回應包裝：`{ "success": true/false, "data": T, "message": "..." }`。  
@@ -149,31 +149,31 @@ Owner unit 持有完整編輯與工作流權限；visible unit 只能查看列�
 
 ## CMS 後台路由
 
-context-path 為 `/cws`，所有路由以此為根（`http://localhost:8200/cws/...`）。
+context-path 為 `/cms`，所有路由以此為根（`http://localhost:8200/cms/...`）。
 
 ```
-GET  /cws/auth/login        登入頁（Bootstrap 表單）
-GET  /cws/dashboard         統計 + MA 待處理列表
-GET  /cws/pages             頁面列表（依單位隔離，可依狀態 tab 篩選）
-GET  /cws/pages/new         新增頁面（OP 限定）
-GET  /cws/pages/{id}/edit   編輯頁面（DRAFT / APPROVED 狀態，OP 限定）
-POST /cws/pages/{id}/submit              OP 送審
-POST /cws/pages/{id}/approve             MA 放行建立
-POST /cws/pages/{id}/reject              MA 退回建立
-POST /cws/pages/{id}/request-publish     OP 申請發布
-POST /cws/pages/{id}/approve-publish     MA 放行發布
-POST /cws/pages/{id}/reject-publish      MA 退回發布
-POST /cws/pages/{id}/request-unpublish   OP 申請下架
-POST /cws/pages/{id}/confirm-unpublish   MA 確認下架
-POST /cws/pages/{id}/unpublish           MA 直接下架
-GET  /cws/components                        元件管理列表（component_definition）
-GET  /cws/pages/{id}/content               頁面 body 區塊管理（新增/編輯/刪除/排序）
-POST /cws/pages/{id}/content               新增 body block（block_key + sort_order + content_json）
-POST /cws/pages/{id}/content/{cid}        更新 body block content_json
-POST /cws/pages/{id}/content/{cid}/delete 刪除 body block
-GET  /cws/assets            素材管理（Grid 預覽，全單位可見）
-POST /cws/assets/upload     上傳（OP / MA 可操作）
-POST /cws/assets/{id}/delete 刪除（同單位 OP / MA 限定）
+GET  /cms/auth/login        登入頁（Bootstrap 表單）
+GET  /cms/dashboard         統計 + MA 待處理列表
+GET  /cms/pages             頁面列表（依單位隔離，可依狀態 tab 篩選）
+GET  /cms/pages/new         新增頁面（OP 限定）
+GET  /cms/pages/{id}/edit   編輯頁面（DRAFT / APPROVED 狀態，OP 限定）
+POST /cms/pages/{id}/submit              OP 送審
+POST /cms/pages/{id}/approve             MA 放行建立
+POST /cms/pages/{id}/reject              MA 退回建立
+POST /cms/pages/{id}/request-publish     OP 申請發布
+POST /cms/pages/{id}/approve-publish     MA 放行發布
+POST /cms/pages/{id}/reject-publish      MA 退回發布
+POST /cms/pages/{id}/request-unpublish   OP 申請下架
+POST /cms/pages/{id}/confirm-unpublish   MA 確認下架
+POST /cms/pages/{id}/unpublish           MA 直接下架
+GET  /cms/components                        元件管理列表（component_definition）
+GET  /cms/pages/{id}/content               頁面 body 區塊管理（新增/編輯/刪除/排序）
+POST /cms/pages/{id}/content               新增 body block（block_key + sort_order + content_json）
+POST /cms/pages/{id}/content/{cid}        更新 body block content_json
+POST /cms/pages/{id}/content/{cid}/delete 刪除 body block
+GET  /cms/assets            素材管理（Grid 預覽，全單位可見）
+POST /cms/assets/upload     上傳（OP / MA 可操作）
+POST /cms/assets/{id}/delete 刪除（同單位 OP / MA 限定）
 ```
 
 ## DB Schema 管理
@@ -224,11 +224,11 @@ header/footer 同理，fragment 宣告改為 `th:fragment="header(config)"` / `t
 ./mvnw spring-boot:run -pl portal-web -Dspring-boot.run.profiles=dev
 ```
 
-`ComponentSyncRunner` 啟動時自動掃描所有 fragment，將元件寫入 `component_definition`（含 `schema_json`、`device_mode`）。可查 `/cws/components` 確認新元件出現。
+`ComponentSyncRunner` 啟動時自動掃描所有 fragment，將元件寫入 `component_definition`（含 `schema_json`、`device_mode`）。可查 `/cms/components` 確認新元件出現。
 
 ### Step 3：CMS 建立頁面並加入元件
 
-1. OP 登入 CMS → `/cws/pages/new`，填入路徑、選擇 header/footer template（TemplateKey 白名單）
+1. OP 登入 CMS → `/cms/pages/new`，填入路徑、選擇 header/footer template（TemplateKey 白名單）
 2. 編輯頁面，加入 body 元件（選擇 `block_key`，寫入 `page_content`）
 3. （Plan 2）填寫各欄位 config，存至 `page_content.content_json`
 4. OP 送審 → MA 放行 → APPROVED
@@ -251,7 +251,7 @@ GET /web/preview/component/{key}  dev 環境：依 block_key 渲染單一 body �
 GET /web/preview/{pageId}         dev 環境：渲染任意 page（含未發布），headerConfig/footerConfig 為空 Map
 ```
 
-素材靜態資源由 portal-cms 提供：`http://localhost:8200/cws/uploads/**`，portal-web 的 template 直接引用此 URL。  
+素材靜態資源由 portal-cms 提供：`http://localhost:8200/cms/uploads/**`，portal-web 的 template 直接引用此 URL。  
 `cms.preview-base-url`（dev）已設為 `http://localhost:8100/web`，包含 context-path，CMS 的「↗ 預覽」連結才能正確指向 portal-web。
 
 ---

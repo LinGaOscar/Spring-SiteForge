@@ -82,7 +82,7 @@ SELECT id, 'rwd_hero', 0,
 
 INSERT INTO page_content (page_id, block_key, sort_order, content_json, locale)
 SELECT id, 'rwd_text_image', 1,
-    '{"badge":"我們的故事","title":"從一個願景出發","body":"<p>2015 年，我們以「讓每個企業都能擁有專業數位形象」為使命創立。歷經十年深耕，從最初的小型團隊，成長為橫跨多個產業的數位解決方案夥伴。</p><p>我們相信，優質的數位體驗不應只是大企業的專利，因此我們持續開發易於使用的 CMS 平台，讓各規模企業都能高效管理品牌內容。</p>","imageUrl":"http://localhost:8200/cws/uploads/about/company.png","imageAlt":"公司故事照片","imagePosition":"right"}',
+    '{"badge":"我們的故事","title":"從一個願景出發","body":"<p>2015 年，我們以「讓每個企業都能擁有專業數位形象」為使命創立。歷經十年深耕，從最初的小型團隊，成長為橫跨多個產業的數位解決方案夥伴。</p><p>我們相信，優質的數位體驗不應只是大企業的專利，因此我們持續開發易於使用的 CMS 平台，讓各規模企業都能高效管理品牌內容。</p>","imageUrl":"http://localhost:8200/cms/uploads/about/company.png","imageAlt":"公司故事照片","imagePosition":"right"}',
     'zh-TW' FROM page WHERE path = '/about';
 
 INSERT INTO page_content (page_id, block_key, sort_order, content_json, locale)

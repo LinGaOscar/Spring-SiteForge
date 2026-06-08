@@ -20,7 +20,7 @@ public class TomcatRootRedirectConfig {
             @Override
             public void invoke(Request request, Response response) throws IOException, ServletException {
                 if ("/".equals(request.getDecodedRequestURI())) {
-                    response.sendRedirect("/cws/auth/login");
+                    response.sendRedirect("/cms/auth/login");
                     return;
                 }
                 getNext().invoke(request, response);

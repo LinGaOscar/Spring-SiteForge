@@ -11,7 +11,7 @@ spring:
 server:
   port: 8200
   servlet:
-    context-path: /cws
+    context-path: /cms
     session:
       timeout: 30m
       cookie:
