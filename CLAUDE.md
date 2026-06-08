@@ -274,3 +274,5 @@ GET /web/preview/{pageId}         dev 環境：渲染任意 page（含未發布�
 - `cms.preview-base-url` 僅設定於 `application-dev.yml`，正式環境不存在 → CMS 的「↗ 預覽」按鈕與元件 iframe 為 dev only 功能。
 - `GlobalModelAdvice` 替所有 CMS Thymeleaf template 注入 `currentUri`（當前請求 URI），供 sidebar 高亮判斷使用。
 - SSO 登入為預留介面，目前僅實作帳密登入。
+- **Thymeleaf form action 必須用 `@{}`**：`th:action="${...}"` 是字串 expression，不含 context-path，POST 會 404。一律寫 `th:action="@{...}"` 或 `th:action="${cond} ? @{/a} : @{/b}"`。
+- **`Page` 上新增 `@ElementCollection` 後**：`spring.jpa.open-in-view=false` 情況下，若 Thymeleaf 模板要存取該欄位，必須把它加進 `PageRepository.findById` 的 `@EntityGraph` attributePaths，否則觸發 `LazyInitializationException`。
