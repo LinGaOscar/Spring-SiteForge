@@ -23,3 +23,6 @@ logs/
 # Environment / secrets
 *.env
 application-local.yml
+
+# 上傳素材（本機儲存，不進版控）
+uploads/
