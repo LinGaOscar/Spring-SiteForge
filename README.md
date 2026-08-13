@@ -16,8 +16,8 @@ spring-siteforge/
 | 模組 | 職責 | Port |
 |------|------|------|
 | `portal-domain` | Entity、Repository、Enum/DTO 共用層 | — |
-| `portal-web` | 前台 Thymeleaf SSR + Vue.js，唯讀已發布頁面 | 8100 |
-| `portal-cms` | 後台 CMS REST API + 管理介面，需 JWT 驗證 | 8200 |
+| `portal-web` | 前台 Thymeleaf SSR + Vue 3（CDN，客戶端互動用），唯讀已發布頁面，無 REST API | 8100 |
+| `portal-cms` | 後台 Thymeleaf 管理介面 + REST API，Spring Security Session 表單登入驗證 | 8200 |
 
 ### 核心原則
 
@@ -33,8 +33,10 @@ spring-siteforge/
 - Java 21 + Spring Boot 3.3
 - Spring Data JPA + PostgreSQL（Schema 由 `db/init/*.sql` 管理，無 Flyway）
 - Spring Security（portal-cms 表單登入，Session 驗證）
-- Thymeleaf SSR
+- Redis（`portal-web` 依賴，`docker-compose` 已含此服務；目前 cache type 為 `simple`，Redis 為後續頁面快取功能預留）
+- Thymeleaf SSR + Vue 3（CDN，`portal-web` 客戶端互動用）
 - Lombok
+- OWASP Java HTML Sanitizer（`portal-cms` 富文字內容清洗）
 
 ---
 
@@ -59,12 +61,13 @@ unit
 
 ## API 路由
 
-完整 API 文件請參閱 [docs/api.md](docs/api.md)。
+詳見 [docs/api.md](docs/api.md)（注意：該文件部分路徑前綴與目前程式碼有落差，實際前綴以下表與程式碼 `@RequestMapping` 為準）。
 
 | 分類 | 前綴 | 應用 |
 |------|------|------|
-| 前台 Public | `/api/` | portal-web (8100) |
-| CMS | `/api/cms/` | portal-cms (8200) |
+| 前台頁面渲染（無 REST API） | `/web/**` | portal-web (8100) |
+| CMS 後台頁面（Thymeleaf SSR） | `/cms/**` | portal-cms (8200) |
+| CMS REST API（Session 驗證，CSRF 豁免） | `/cms/api/**` | portal-cms (8200) |
 
 ---
 
@@ -90,7 +93,7 @@ Request /about
 詳細設定與啟動步驟請參閱 [docs/dev.md](docs/dev.md)。
 
 ```bash
-docker compose up -d                                                      # 啟動 PostgreSQL（首次自動執行 db/init/*.sql）
+docker compose up -d                                                      # 啟動 PostgreSQL + Redis（首次自動執行 db/init/*.sql）
 ./mvnw spring-boot:run -pl portal-web "-Dspring-boot.run.profiles=dev"     # 前台 → http://localhost:8100（同時同步 component_definition）
 ./mvnw spring-boot:run -pl portal-cms "-Dspring-boot.run.profiles=dev"     # 後台 → http://localhost:8200/cms/
 ```
@@ -101,11 +104,13 @@ docker compose up -d                                                      # 啟�
 
 ## 正式部署
 
-詳細打包與上版步驟請參閱 [docs/prod.md](docs/prod.md)。
+以 Docker 建置映像、打包成 `.tar.gz` 後傳輸到目標伺服器載入啟動（適用內網或無對外連線環境）。詳細步驟請參閱 [docs/prod.md](docs/prod.md)。
 
 ```bash
-./mvnw package -DskipTests                   # 打包 JAR
-# 將 JAR + application-prod.yml 傳輸到伺服器後以 java -jar 執行
+docker compose -f docker-compose.prod.yml build              # 建置 portal-web / portal-cms 映像
+docker save spring-siteforge-portal-cms:latest | gzip > portal-cms.tar.gz
+docker save spring-siteforge-portal-web:latest | gzip > portal-web.tar.gz
+# 連同 docker-compose.prod.yml、docker/nginx.conf 傳輸到伺服器後 docker compose up -d
 ```
 
 ---
@@ -113,9 +118,9 @@ docker compose up -d                                                      # 啟�
 ## 模組依賴關係
 
 ```
-portal-web  ──┐
-               ├──→ portal-domain ──→ PostgreSQL
-portal-cms  ──┘
+portal-web  ──┬──→ portal-domain ──→ PostgreSQL
+              └──→ Redis（health check / 預留快取）
+portal-cms  ────→ portal-domain ──→ PostgreSQL
 ```
 
 ---

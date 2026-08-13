@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 開發環境啟動流程
 
 ```bash
-# 1. 建立 DB（首次，自動執行 db/init/*.sql）
+# 1. 啟動 PostgreSQL + Redis（首次自動執行 db/init/*.sql；Redis 目前僅供 portal-web health check 使用，快取型別為 simple，非強依賴）
 docker compose up -d
 
 # 2. 重置 DB（清除所有資料重來）
